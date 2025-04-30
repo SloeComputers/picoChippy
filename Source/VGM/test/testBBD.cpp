@@ -20,60 +20,34 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------
 
-#pragma once
+#include "VGM/BBD.h"
 
-#include <cstdint>
+#include "STB/Test.h"
 
-#include "BBD.h"
-#include "iG10090.h"
-
-namespace DX21 {
-
-class Audio
+TEST(BBD, basic)
 {
-public:
-   Audio() = default;
+   const unsigned LOG2_BUCKETS = 8;
+   const unsigned FILTER_DELAY = 3;
+   const unsigned BUCKETS      = 1 << LOG2_BUCKETS;
 
-   void setSampleRate(unsigned sample_rate_)
+   BBD<LOG2_BUCKETS> bbd{};
+   int32_t           last_out = 0;
+
+   for(unsigned i = 0; i < (BUCKETS * 2); ++i)
    {
-      modulator.setSampleRate(sample_rate_);
-   }
+      int32_t in  = i;
+      int32_t out = bbd.sendRecv(in);
 
-   //! Simulation of DX21 audio processing
-   void process(int16_t& left, int16_t& right)
-   {
-      int32_t dry_l = (left * (128 - balance)) / 64;
-      int32_t dry_r = (right * balance) / 64;
-
-      int32_t mix_l;
-      int32_t mix_r;
-
-      if (chorus)
+      if (i > (BUCKETS + (FILTER_DELAY * 2)))
       {
-         bbd.setMod(modulator.sample());
-
-         int32_t wet = bbd.sendRecv((dry_l + dry_r) / 2);
-
-         mix_l = (dry_l + wet) / 2;
-         mix_r = (dry_r - wet) / 2;
+         EXPECT_NE(out, 0);
+         EXPECT_GT(out, last_out);
       }
-      else
+      else if (i < BUCKETS)
       {
-         mix_l = dry_l;
-         mix_r = dry_r;
+         EXPECT_EQ(out, 0);
       }
 
-      // TODO LOG volume
-      left  = (mix_l * volume) / 128;
-      right = (mix_r * volume) / 128;
+      last_out = out;
    }
-
-   volatile uint8_t balance{64};
-   volatile uint8_t volume{127};
-   volatile bool    chorus{false};
-
-   BBD</* LOG2_SIZE */ 8> bbd{};
-   iG10090                modulator{/* clock */ 8000, /* chorus */ 5, /* tremolo */ 18};
-};
-
-} // namespace DX21
+}

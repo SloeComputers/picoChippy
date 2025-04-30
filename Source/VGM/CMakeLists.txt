@@ -22,32 +22,26 @@
 
 add_custom_command(
    COMMENT
-      "Auto-generate for DX21"
+      "Auto-generate for VGM"
    COMMAND
       ${CMAKE_COMMAND}
          -E env PYTHONPATH=${python_path}
          ${CMAKE_CURRENT_SOURCE_DIR}/AUTO.py
-             ${CMAKE_CURRENT_SOURCE_DIR}/rom/dx21_rom_v1_5.bin
    DEPENDS
       ${CMAKE_CURRENT_SOURCE_DIR}/AUTO.py
-      ${CMAKE_CURRENT_SOURCE_DIR}/rom/dx21_rom_v1_5.bin
    OUTPUT
-      ${CMAKE_CURRENT_BINARY_DIR}/Table_dx21_rom.h
-      ${CMAKE_CURRENT_BINARY_DIR}/Table_dx21_rom.cpp
       ${CMAKE_CURRENT_BINARY_DIR}/Table_iG10090_sine.h
       ${CMAKE_CURRENT_BINARY_DIR}/Table_iG10090_sine.cpp
       ${CMAKE_CURRENT_BINARY_DIR}/Table_bbd_filter.h
       ${CMAKE_CURRENT_BINARY_DIR}/Table_bbd_filter.cpp
    )
 
-add_library(DX21 STATIC
-   Table_dx21_rom.cpp
+add_library(VGM STATIC
    Table_iG10090_sine.cpp
    Table_bbd_filter.cpp
-   SysEx.cpp
    )
 
-target_include_directories(DX21
+target_include_directories(VGM
    PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..
    )

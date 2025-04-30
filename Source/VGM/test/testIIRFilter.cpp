@@ -20,7 +20,7 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------
 
-#include "DX21/IIRFilter.h"
+#include "VGM/IIRFilter.h"
 
 #include "STB/Test.h"
 

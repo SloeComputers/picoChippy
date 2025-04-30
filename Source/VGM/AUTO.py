@@ -23,7 +23,6 @@
 
 import math
 import table
-import sys
 
 def sine64(index_6, x):
    """ Sine lookup table for iG10090 BBD modulator LFO """
@@ -38,24 +37,6 @@ def linear_interp_filter(index, x):
    else:
       y = 2 * (1 - x)
    return int(y * 0xFFFF)
-
-
-filename = sys.argv[1]
-
-data = []
-
-with open(filename, 'rb') as file:
-   while True:
-      byte = file.read(1)
-      if byte == b'':
-         break
-      data.append(int.from_bytes(byte, byteorder='big', signed=False))
-
-table.gen("dx21_rom",
-          func      = lambda i,x : data[i],
-          typename  = "uint8_t",
-          size      = 0x24A0,
-          fmt       = '02x')
 
 table.gen("iG10090_sine", func = sine64, typename = "int8_t", log2_size = 6)
 

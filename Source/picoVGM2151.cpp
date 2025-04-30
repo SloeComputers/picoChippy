@@ -20,7 +20,7 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------
 
-// \brief DX21 hybrid simulation for Raspberry Pi Pico
+// \brief YM2151 VGM player for Raspberry Pi Pico
 
 #include <cstdio>
 
@@ -28,7 +28,7 @@
 #include "MTL/MTL.h"
 #endif
 
-#include "DX21/DX21Synth.h"
+#include "VGM/VGMPlayer.h"
 #include "hw/hw.h"
 
 #include "SynthIO.h"
@@ -40,19 +40,19 @@ static const bool  MIDI_DEBUG      = false;
 static SynthIO     synth_io{};
 static hw::Led     led{};
 
-DX21::Synth dx21_synth{synth_io};
+VGM::Player vgm_player{synth_io};
 
 
 // --- Physical MIDI -----------------------------------------------------------
 
-static hw::MidiIn  midi_in{dx21_synth, MIDI_DEBUG};
+static hw::MidiIn  midi_in{vgm_player, MIDI_DEBUG};
 
 
 // --- USB MIDI ----------------------------------------------------------------
 
 #if defined(HW_MIDI_USB_DEVICE)
 
-static hw::MidiUSBDevice midi_usb{dx21_synth, 0x91C0, "picoX21H", MIDI_DEBUG};
+static hw::MidiUSBDevice midi_usb{vgm_player, 0x91C0, "picoVGM2151", MIDI_DEBUG};
 
 extern "C" void IRQ_USBCTRL() { midi_usb.usb.irq(); }
 
@@ -87,7 +87,7 @@ int main()
    printf("\e[1,1H");
 
    printf("\n");
-   printf("Program  : picoX21-H (%s)\n", HW_DESCR);
+   printf("Program  : picoVGM2151 (%s)\n", HW_DESCR);
    printf("Author   : Copyright (c) 2025 John D. Haughton\n");
    printf("License  : MIT\n");
    printf("Version  : %s\n", PLT_VERSION);
@@ -97,7 +97,7 @@ int main()
    printf("\n");
 
 #if not defined(HW_NATIVE)
-   unsigned ym2151_clock_hz = dx21_synth.start();
+   unsigned ym2151_clock_hz = vgm_player.start();
 
    startAudio(ym2151_clock_hz);
 #endif
@@ -110,7 +110,7 @@ int main()
       midi_usb.tick();
 #endif
 
-      led = dx21_synth.isAnyVoiceOn();
+      led = vgm_player.isAnyVoiceOn();
    }
 
    return 0;

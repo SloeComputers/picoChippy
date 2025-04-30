@@ -33,9 +33,9 @@
 static MTL::PioYMDAC<MTL::Pio1>   ymdac_in{};
 static MTL::PioI2S_S16<MTL::Pio0> i2s_out{};
 
-#include "DX21/DX21Synth.h"
+#include "VGM/VGMPlayer.h"
 
-extern DX21::Synth dx21_synth;
+extern VGM::Player vgm_player;
 
 
 static void runDAC()
@@ -46,7 +46,7 @@ static void runDAC()
 
       ymdac_in.pop(left, right);
 
-      dx21_synth.audio.process(left, right);
+      vgm_player.audio.process(left, right);
 
       uint32_t packed = (left << 16) | (right & 0xFFFF);
       i2s_out.push(packed);

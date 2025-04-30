@@ -1,6 +1,6 @@
 # picoVGM2151
 
-![picoxVGM2151](docs/picoX21H.png)
+![picoxVGM2151](docs/picoVGM2151.png)
 
 A VGM player using a Raspberry Pi Pico, a YM2151 (OPM) sound chip and an I2S DAC.
 
@@ -51,7 +51,7 @@ Build a single hardware target e.g. rpipico2 using cmake...
 
 flashable images will be found under the build sub-directory here...
 
-    build/Source/picoX21H_I2S_DAC.uf2
+    build/Source/picoVGM2151_I2S_DAC.uf2
 
 ## License
 
@@ -59,4 +59,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Acknowledgements
 
- + The engineers at [Yamaha](https://www.yamaha.com/en/about/design/synapses/id_009)
