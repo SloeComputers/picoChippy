@@ -52,7 +52,7 @@ static hw::MidiIn  midi_in{vgm_player, MIDI_DEBUG};
 
 #if defined(HW_MIDI_USB_DEVICE)
 
-static hw::MidiUSBDevice midi_usb{vgm_player, 0x91C0, "picoVGM2151", MIDI_DEBUG};
+static hw::MidiUSBDevice midi_usb{vgm_player, 0x91C0, "picoChippy", MIDI_DEBUG};
 
 extern "C" void IRQ_USBCTRL() { midi_usb.usb.irq(); }
 
@@ -87,7 +87,7 @@ int main()
    printf("\e[1,1H");
 
    printf("\n");
-   printf("Program  : picoVGM2151 (%s)\n", HW_DESCR);
+   printf("Program  : Cambridge pico Chippy (%s)\n", HW_DESCR);
    printf("Author   : Copyright (c) 2025 John D. Haughton\n");
    printf("License  : MIT\n");
    printf("Version  : %s\n", PLT_VERSION);

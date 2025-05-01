@@ -27,11 +27,11 @@ add_subdirectory(hw)
 
 foreach(hw_config ${hw_config_list})
 
-   add_executable(picoVGM2151_${hw_config}
-                  picoVGM2151.cpp
+   add_executable(picoChippy_${hw_config}
+                  picoChippy.cpp
                   audio.cpp)
 
-   target_compile_definitions(picoVGM2151_${hw_config} PRIVATE HW_${hw_config})
-   target_link_libraries(     picoVGM2151_${hw_config} PRIVATE VGM HW)
+   target_compile_definitions(picoChippy_${hw_config} PRIVATE HW_${hw_config})
+   target_link_libraries(     picoChippy_${hw_config} PRIVATE VGM HW)
 
 endforeach()

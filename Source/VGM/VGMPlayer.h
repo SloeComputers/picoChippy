@@ -28,14 +28,17 @@
 #include "STB/MIDIInstrument.h"
 
 #include "VGMAudio.h"
+#include "VGMImage.h"
 
 #if defined(HW_NATIVE)
 #include "YM2151_Model.h"
 #else
-#include "YM2151_Interface.h"
+#include "YM2151_Hardware.h"
 #endif
 
 #include "../SynthIO.h"
+
+#include "Table_vgm.h"
 
 namespace VGM {
 
@@ -52,13 +55,13 @@ public:
       ym2151.download(ym2151_clock_hz_);
       ym2151.start();
 
-      io.displayLCD(0, "  pico VGM2151  ");
-      io.displayLCD(1, "     Player     ");
+      io.displayLCD(0, " Cambridge pico ");
+      io.displayLCD(1, " -*- Chippy -*- ");
 
       usleep(1000000);
 
-      io.displayLCD(0, "                ");
-      io.displayLCD(1, "                ");
+      image.load(table_vgm);
+      image.dis();
 
       for(unsigned i = 0; i < NUM_VOICES; ++i)
       {
@@ -78,7 +81,7 @@ private:
    void voiceInit(unsigned index_)
    {
       // Config channel ops
-      for(unsigned i = 0; i < /* NUM_OP */ 4; ++i)
+      for(unsigned i = 0; i < /* NUM_OP */ 1; ++i)
       {
          uint8_t op;
          switch(i)
@@ -91,11 +94,11 @@ private:
 
          ym2151.setOp<YM2151::EG_AR>( index_, op, 31);
          ym2151.setOp<YM2151::EG_D1R>(index_, op, 0);
-         ym2151.setOp<YM2151::EG_D1L>(index_, op, 15);
+         ym2151.setOp<YM2151::EG_D1L>(index_, op, 0);
          ym2151.setOp<YM2151::EG_D2R>(index_, op, 0);
-         ym2151.setOp<YM2151::EG_RR>( index_, op, 14);
+         ym2151.setOp<YM2151::EG_RR>( index_, op, 15);
 
-         ym2151.setOp<YM2151::EG_TL>( index_, op, 0);
+         ym2151.setOp<YM2151::EG_TL>( index_, op, 10);
 
          ym2151.setOp<YM2151::MUL>(index_, op, 1);
       }
@@ -116,6 +119,9 @@ private:
 
    void voiceOn(unsigned index_, uint8_t midi_note_, uint8_t velocity_) override
    {
+      image.play(&ym2151);
+
+#if 0
       static const unsigned table[12] = {0, 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14};
 
       midi_note_ -= 1;
@@ -126,11 +132,12 @@ private:
       ym2151.setCh<YM2151::KC>(index_, (octave << 4) | note);
 
       ym2151.noteOn(index_);
+#endif
    }
 
    void voiceOff(unsigned index_, uint8_t velocity_) override
    {
-      ym2151.noteOff(index_);
+      // ym2151.noteOff(index_);
    }
 
    void voicePressure(unsigned index_, uint8_t level_) override
@@ -169,12 +176,14 @@ private:
 #if defined(HW_NATIVE)
    YM2151::Model ym2151{};
 #else
-   YM2151::Interface<MTL::Pio0,
-                     /* CTRL4    */ MTL::PIN_4,
-                     /* CLK_M    */ MTL::PIN_9,
-                     /* DATA8    */ MTL::PIN_14,
-                     /* REV_DATA */ true> ym2151{};
+   YM2151::Hardware<MTL::Pio0,
+                    /* CTRL4    */ MTL::PIN_4,
+                    /* CLK_M    */ MTL::PIN_9,
+                    /* DATA8    */ MTL::PIN_14,
+                    /* REV_DATA */ true> ym2151{};
 #endif
+
+   Image image{};
 };
 
 } // namespace VGM

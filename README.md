@@ -1,12 +1,16 @@
-# picoVGM2151
+# Cambridge pico Chippy
 
-![picoxVGM2151](docs/picoVGM2151.png)
+![picoChippy](docs/picoChippy.png)
 
 A VGM player using a Raspberry Pi Pico, a YM2151 (OPM) sound chip and an I2S DAC.
+
+Re-uses the same hardware as the sister project [picoX21H](https://github.com/AnotherJohnH/picoX21H)
 
 [Block Diagram](docs/block_diagram.pdf)
 
 ## Status
+
+WIP ... just started!!!
 
 ## Hardware
 
@@ -21,11 +25,11 @@ A VGM player using a Raspberry Pi Pico, a YM2151 (OPM) sound chip and an I2S DAC
 This repo uses git sub-modules, so checkout using --recurse to clone all the
 dependent source...
 
-    git clone --recurse https://github.com/AnotherJohnH/picoVGM2151.git
+    git clone --recurse https://github.com/AnotherJohnH/picoChippy.git
 
 ore
 
-    git clone --recurse ssh://git@github.com/AnotherJohnH/picoVGM2151.git
+    git clone --recurse ssh://git@github.com/AnotherJohnH/picoChippy.git
 
 ### Software dependencies
 
@@ -51,7 +55,7 @@ Build a single hardware target e.g. rpipico2 using cmake...
 
 flashable images will be found under the build sub-directory here...
 
-    build/Source/picoVGM2151_I2S_DAC.uf2
+    build/Source/picoChippy_I2S_DAC.uf2
 
 ## License
 
