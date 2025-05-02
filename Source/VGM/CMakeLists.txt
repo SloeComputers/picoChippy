@@ -48,6 +48,7 @@ add_library(VGM STATIC
 
 target_include_directories(VGM
    PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
+   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..
    )
 

@@ -26,17 +26,18 @@
 #include <cstdio>
 #include <unistd.h>
 
-#include "YM2151_Interface.h"
+#include "YM2151/Interface.h"
+#include "SegaPCM/Interface.h"
 
 #undef  DBG
 #define DBG if (0) printf
 
 namespace VGM {
 
-class Image
+class Decoder
 {
 public:
-   Image() = default;
+   Decoder() = default;
 
    void load(const uint8_t* data_)
    {
@@ -56,7 +57,8 @@ public:
       printf("\n");
    }
 
-   void play(YM2151::Interface* ym2151_)
+   void play(YM2151::Interface*      ym2151_,
+             SegaPCM::Interface<16>* sega_pcm_)
    {
       reset();
 

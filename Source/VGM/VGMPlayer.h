@@ -28,13 +28,14 @@
 #include "STB/MIDIInstrument.h"
 
 #include "VGMAudio.h"
-#include "VGMImage.h"
+#include "VGMDecoder.h"
 
 #if defined(HW_NATIVE)
-#include "YM2151_Model.h"
+#include "YM2151/Fake.h"
 #else
-#include "YM2151_Hardware.h"
+#include "YM2151/Hardware.h"
 #endif
+#include "SegaPCM/Fake.h"
 
 #include "../SynthIO.h"
 
@@ -60,8 +61,8 @@ public:
 
       usleep(1000000);
 
-      image.load(table_vgm);
-      image.dis();
+      decoder.load(table_vgm);
+      decoder.dis();
 
       for(unsigned i = 0; i < NUM_VOICES; ++i)
       {
@@ -119,7 +120,7 @@ private:
 
    void voiceOn(unsigned index_, uint8_t midi_note_, uint8_t velocity_) override
    {
-      image.play(&ym2151);
+      decoder.play(&ym2151, &sega_pcm);
 
 #if 0
       static const unsigned table[12] = {0, 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14};
@@ -161,11 +162,6 @@ private:
          if (index_ == 0)
             audio.balance = value_;
          break;
-
-      case 12:
-         if (index_ == 0)
-            audio.chorus = value_ >= 64;
-         break;
       }
    }
 
@@ -174,7 +170,7 @@ private:
    SynthIO& io;
 
 #if defined(HW_NATIVE)
-   YM2151::Model ym2151{};
+   YM2151::Fake ym2151{};
 #else
    YM2151::Hardware<MTL::Pio0,
                     /* CTRL4    */ MTL::PIN_4,
@@ -183,7 +179,9 @@ private:
                     /* REV_DATA */ true> ym2151{};
 #endif
 
-   Image image{};
+   SegaPCM::Fake<16> sega_pcm{};
+
+   Decoder decoder{};
 };
 
 } // namespace VGM

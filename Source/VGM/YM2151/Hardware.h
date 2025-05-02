@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "YM2151_Interface.h"
+#include "YM2151/Interface.h"
 
 #include "MTL/Gpio.h"
 #include "MTL/chip/PioClock.h"

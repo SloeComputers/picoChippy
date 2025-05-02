@@ -24,14 +24,14 @@
 
 #pragma once
 
-#include "YM2151_Interface.h"
+#include "YM2151/Interface.h"
 
 namespace YM2151 {
 
-class Model : public Interface
+class Fake : public Interface
 {
 public:
-   Model() = default;
+   Fake() = default;
 
    signed download(unsigned clock_freq_)
    {

@@ -24,8 +24,6 @@ if(${PLT_NATIVE})
 
    add_executable(test_VGM
       testMain.cpp
-      testBBD.cpp
-      testig10090.cpp
       testIIRFilter.cpp
        )
 
