@@ -25,7 +25,8 @@ if(${PLT_NATIVE})
    add_executable(test_VGM
       testMain.cpp
       testIIRFilter.cpp
-       )
+      testVGMDecoder.cpp
+      )
 
    target_link_libraries(test_VGM
       PRIVATE VGM STB)

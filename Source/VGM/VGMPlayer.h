@@ -31,11 +31,11 @@
 #include "VGMDecoder.h"
 
 #if defined(HW_NATIVE)
-#include "YM2151/Fake.h"
+#include "YM2151/Emulator.h"
 #else
 #include "YM2151/Hardware.h"
 #endif
-#include "SegaPCM/Fake.h"
+#include "SegaPCM/Emulator.h"
 
 #include "../SynthIO.h"
 
@@ -69,14 +69,13 @@ public:
          voiceInit(i);
       }
 
-      unsigned sample_rate = ym2151_clock_hz_ / (/* divider */ 2 * /* bits */ 16 * /* chans */ 2);
-
-      audio.setSampleRate(sample_rate);
+      //unsigned sample_rate = ym2151_clock_hz_ / (/* divider */ 2 * /* bits */ 16 * /* chans */ 2);
 
       return ym2151_clock_hz_;
    }
 
-   Audio audio{};
+   Audio             audio{};
+   SegaPCM::Emulator sega_pcm{};
 
 private:
    void voiceInit(unsigned index_)
@@ -165,12 +164,12 @@ private:
       }
    }
 
-   static const unsigned YM2151_CLOCK_HZ = 3579545; //!< 3.579545 MHz
+   static const unsigned YM2151_CLOCK_HZ = 4000000; //!< 4 MHz
 
    SynthIO& io;
 
 #if defined(HW_NATIVE)
-   YM2151::Fake ym2151{};
+   YM2151::Emulator ym2151{};
 #else
    YM2151::Hardware<MTL::Pio0,
                     /* CTRL4    */ MTL::PIN_4,
@@ -178,8 +177,6 @@ private:
                     /* DATA8    */ MTL::PIN_14,
                     /* REV_DATA */ true> ym2151{};
 #endif
-
-   SegaPCM::Fake<16> sega_pcm{};
 
    Decoder decoder{};
 };

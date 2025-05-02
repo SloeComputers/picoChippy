@@ -20,34 +20,22 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------
 
-// \brief Interface for Yamaha YM2151
+#include "VGM/VGMDecoder.h"
 
-#pragma once
+#include "STB/Test.h"
 
-#include "YM2151/Interface.h"
+#include "YM2151/Emulator.h"
+#include "SegaPCM/Emulator.h"
 
-namespace YM2151 {
+#include "Table_vgm.h"
 
-class Fake : public Interface
+TEST(VGMDecoder, basic)
 {
-public:
-   Fake() = default;
+   VGM::Decoder      decoder{};
+   YM2151::Emulator  ym2151{};
+   SegaPCM::Emulator sega_pcm{};
 
-   signed download(unsigned clock_freq_)
-   {
-      return 0;
-   }
-
-private:
-   //! Write a byte to the YM2151 bus
-   void writeBus(bool a0_, uint8_t value_) override
-   {
-   }
-
-   //! 
-   void waitForReady() override
-   {
-   }
-};
-
-} // namespace YM2151
+   decoder.load(table_vgm);
+   decoder.dis();
+   decoder.play(&ym2151, &sega_pcm);
+}

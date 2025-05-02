@@ -37,19 +37,22 @@ static MTL::PioI2S_S16<MTL::Pio0> i2s_out{};
 
 extern VGM::Player vgm_player;
 
-
 static void runDAC()
 {
+   int32_t pcm_left, pcm_right;
+   int16_t left, right;
+
    while(true)
    {
-      int16_t left, right;
+      vgm_player.sega_pcm.getOut(pcm_left, pcm_right);
 
       ymdac_in.pop(left, right);
+      vgm_player.audio.process(left, right, pcm_left, pcm_right);
+      i2s_out.push((left << 16) | (right & 0xFFFF));
 
-      vgm_player.audio.process(left, right);
-
-      uint32_t packed = (left << 16) | (right & 0xFFFF);
-      i2s_out.push(packed);
+      ymdac_in.pop(left, right);
+      vgm_player.audio.process(left, right, pcm_left, pcm_right);
+      i2s_out.push((left << 16) | (right & 0xFFFF));
    }
 }
 

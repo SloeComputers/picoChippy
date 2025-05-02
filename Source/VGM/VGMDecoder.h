@@ -57,8 +57,8 @@ public:
       printf("\n");
    }
 
-   void play(YM2151::Interface*      ym2151_,
-             SegaPCM::Interface<16>* sega_pcm_)
+   void play(YM2151::Interface*  ym2151_,
+             SegaPCM::Interface* sega_pcm_)
    {
       reset();
 
@@ -95,27 +95,33 @@ public:
                uint32_t size = read32();
 
                DBG("DB type=0x%02x size=0x%x\n", type, size);
+ 
+               if ((type >= 0x80) && (type < 0xC0))
+               {
+                  uint32_t rom_size = read32();
+                  uint32_t address  = read32();
+
+                  size -= 8;
+
+                  switch(type)
+                  {
+                  case 0x80:
+                     printf("SEGA ROM %04x/%04x +%04X %p\n", address, rom_size, size, ptr8());
+                     sega_pcm_->addSample(address, ptr8(), size);
+                     break;
+
+                  default:
+                     printf("???? ROM %04x/%04x +%04X\n", address, rom_size, size);
+                     break;
+                  }
+               }
 
                skip(size);
             }
             break;
 
-         case 0x70:
-         case 0x71:
-         case 0x72:
-         case 0x73:
-         case 0x74:
-         case 0x75:
-         case 0x76:
-         case 0x77:
-         case 0x78:
-         case 0x79:
-         case 0x7A:
-         case 0x7B:
-         case 0x7C:
-         case 0x7D:
-         case 0x7E:
-         case 0x7F:
+         case 0x70: case 0x71: case 0x72: case 0x73: case 0x74: case 0x75: case 0x76: case 0x77:
+         case 0x78: case 0x79: case 0x7A: case 0x7B: case 0x7C: case 0x7D: case 0x7E: case 0x7F:
             wait((byte & 0xF) + 1);
             break;
 
@@ -125,6 +131,7 @@ public:
                uint8_t  data = read8();
 
                DBG("SEGA[0x%04x] = 0x%02x\n", addr, data);
+               sega_pcm_->writeReg(addr, data);
             }
             break;
 
@@ -140,6 +147,8 @@ private:
    {
       offset = 0x34 + hdr->vgm_data_offset;
    }
+
+   const uint8_t* ptr8() { return &raw[offset]; }
 
    uint8_t read8() { return raw[offset++]; }
 

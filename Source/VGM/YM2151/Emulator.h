@@ -20,33 +20,34 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------
 
+// \brief Interface for Yamaha YM2151
+
 #pragma once
 
-#include <cstdint>
+#include "YM2151/Interface.h"
 
-namespace VGM {
+namespace YM2151 {
 
-class Audio
+class Emulator : public Interface
 {
 public:
-   Audio() = default;
+   Emulator() = default;
 
-   //! VGM player audio processing
-   void process(int16_t& left, int16_t& right, int32_t pcm_l, int32_t pcm_r)
+   signed download(unsigned clock_freq_)
    {
-      int32_t mix_l = left  + pcm_l;
-      int32_t mix_r = right + pcm_r;
-
-      int32_t bal_l = (mix_l * (128 - balance)) / 64;
-      int32_t bal_r = (mix_r * balance) / 64;
-
-      // TODO LOG volume
-      left  = (bal_l * volume) / 256;
-      right = (bal_r * volume) / 256;
+      return 0;
    }
 
-   volatile uint8_t balance{64};
-   volatile uint8_t volume{127};
+private:
+   //! Write a byte to the YM2151 bus
+   void writeBus(bool a0_, uint8_t value_) override
+   {
+   }
+
+   //! 
+   void waitForReady() override
+   {
+   }
 };
 
-} // namespace VGM
+} // namespace YM2151
