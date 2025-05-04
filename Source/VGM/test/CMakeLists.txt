@@ -28,8 +28,10 @@ if(${PLT_NATIVE})
       testVGMDecoder.cpp
       )
 
+   target_compile_definitions(test_VGM PRIVATE HW_NATIVE)
+
    target_link_libraries(test_VGM
-      PRIVATE VGM STB)
+      PRIVATE VGM HW)
 
    add_test(NAME test_VGM COMMAND test_VGM)
 

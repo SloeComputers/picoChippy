@@ -24,6 +24,8 @@
 
 #if not defined(HW_NATIVE)
 
+#include "VGM/Player.h"
+
 #include "MTL/MTL.h"
 #include "MTL/Pins.h"
 
@@ -32,8 +34,6 @@
 
 static MTL::PioYMDAC<MTL::Pio1>   ymdac_in{};
 static MTL::PioI2S_S16<MTL::Pio0> i2s_out{};
-
-#include "VGM/Player.h"
 
 extern VGM::Player vgm_player;
 
@@ -44,6 +44,7 @@ static void runDAC()
 
    while(true)
    {
+      vgm_player.tick();
       vgm_player.sega_pcm.getOut(pcm_left, pcm_right);
 
       ymdac_in.pop(left, right);

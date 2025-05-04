@@ -38,6 +38,7 @@ TEST(IIRFIlter, low_pass_order1)
    {
       double in  = ((i / 200) % 2) - 0.5;
       double out = filter.sendRecv(in);
+      (void)out;
       // printf("%u,%g,%g\n", i, in, out);
    }
 }
@@ -56,6 +57,7 @@ TEST(IIRFIlter, low_pass_order2)
    {
       double in  = ((i / 200) % 2) - 0.5;
       double out = filter.sendRecv(in);
+      (void)out;
       // printf("%g,%g\n", in, out);
    }
 }
@@ -74,6 +76,7 @@ TEST(IIRFIlter, low_pass_order1_int)
    {
       int32_t in  = ((i / 200) % 2) * FP16(1.0) - FP16(0.5);
       int32_t out = filter.sendRecv(in);
+      (void)out;
       // printf("%u,0x%04x,0x%04x\n", i, in, out);
    }
 }

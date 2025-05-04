@@ -26,6 +26,10 @@
 #include <cstdio>
 #include <unistd.h>
 
+#if defined(HW_NATIVE)
+#include <atomic>
+#endif
+
 #include "YM2151/Interface.h"
 #include "SegaPCM/Interface.h"
 
@@ -39,9 +43,10 @@ class Decoder
 public:
    Decoder() = default;
 
-   void load(const uint8_t* data_)
+   //! Load VGM image
+   void load(const uint8_t* image_)
    {
-      raw = data_;
+      raw = image_;
       hdr = (const Header*)raw;
    }
 
@@ -50,8 +55,8 @@ public:
       printf("\n");
       printf("Size       : %u bytes\n", hdr->eof_offset + 4);
       printf("Version    : %x.%02x\n",  hdr->version >> 8, hdr->version & 0xFF);
-      printf("YM2151 clk : %u Hz\n",    hdr->ym2151_clock);
       printf("VGM offset : +0x%x\n",    0x34 + hdr->vgm_data_offset);
+      printf("YM2151 clk : %u Hz\n",    hdr->ym2151_clock);
       printf("Sega PCMclk: %u Hz\n",    hdr->sega_pcm_clock);
       printf("Sega PCMifc: 0x%08x\n",   hdr->sega_pcm_interface);
       printf("\n");
@@ -142,6 +147,11 @@ public:
       }
    }
 
+   void tick()
+   {
+      samples++;
+   }
+
 private:
    void reset()
    {
@@ -192,6 +202,12 @@ private:
    const Header*  hdr;
    const uint8_t* raw;
    unsigned       offset{0};
+
+#if defined(HW_NATIVE)
+   std::atomic<unsigned> samples{0};
+#else
+   volatile unsigned samples{0};
+#endif
 };
 
 } // namespace VGM

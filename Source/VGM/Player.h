@@ -74,6 +74,11 @@ public:
       return ym2151_clock_hz_;
    }
 
+   void tick()
+   {
+      decoder.tick();
+   }
+
    Audio             audio{};
    SegaPCM::Emulator sega_pcm{};
 
