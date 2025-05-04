@@ -33,7 +33,7 @@
 static MTL::PioYMDAC<MTL::Pio1>   ymdac_in{};
 static MTL::PioI2S_S16<MTL::Pio0> i2s_out{};
 
-#include "VGM/VGMPlayer.h"
+#include "VGM/Player.h"
 
 extern VGM::Player vgm_player;
 

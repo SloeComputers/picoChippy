@@ -27,8 +27,8 @@
 
 #include "STB/MIDIInstrument.h"
 
-#include "VGMAudio.h"
-#include "VGMDecoder.h"
+#include "Audio.h"
+#include "Decoder.h"
 
 #if defined(HW_NATIVE)
 #include "YM2151/Emulator.h"

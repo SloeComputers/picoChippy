@@ -28,7 +28,7 @@
 #include "MTL/MTL.h"
 #endif
 
-#include "VGM/VGMPlayer.h"
+#include "VGM/Player.h"
 #include "hw/hw.h"
 
 #include "SynthIO.h"

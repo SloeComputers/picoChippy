@@ -20,7 +20,7 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------
 
-#include "VGM/VGMDecoder.h"
+#include "VGM/Decoder.h"
 
 #include "STB/Test.h"
 
