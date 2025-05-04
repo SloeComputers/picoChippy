@@ -12,6 +12,11 @@ Re-uses the same hardware as the sister project [picoX21H](https://github.com/An
 
 WIP ... just started!!!
 
+Working...
+   + VGM decode (but only for supported chips)
+   + YM2151 hardware driver and YMDAC to I2S translator
+   + SegaPCM emulation mixed into the main I2S stream
+
 ## Hardware
 
 ![prototype](docs/breadboard.jpg)

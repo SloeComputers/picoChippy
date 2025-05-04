@@ -29,10 +29,10 @@ add_custom_command(
       ${CMAKE_COMMAND}
          -E env PYTHONPATH=${python_path}
          ${CMAKE_CURRENT_SOURCE_DIR}/AUTO.py
-             ${CMAKE_CURRENT_SOURCE_DIR}/01.vgm
+             ${CMAKE_CURRENT_SOURCE_DIR}/demo.vgm
    DEPENDS
       ${CMAKE_CURRENT_SOURCE_DIR}/AUTO.py
-      ${CMAKE_CURRENT_SOURCE_DIR}/01.vgm
+      ${CMAKE_CURRENT_SOURCE_DIR}/demo.vgm
    OUTPUT
       ${CMAKE_CURRENT_BINARY_DIR}/Table_vgm.h
       ${CMAKE_CURRENT_BINARY_DIR}/Table_vgm.cpp
