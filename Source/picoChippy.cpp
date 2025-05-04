@@ -33,6 +33,8 @@
 
 #include "SynthIO.h"
 
+#include "Table_vgm.h"
+
 // -----------------------------------------------------------------------------
 
 static const bool  MIDI_DEBUG      = false;
@@ -78,7 +80,7 @@ void SynthIO::displayLCD(unsigned row, const char* text)
 
 // -----------------------------------------------------------------------------
 
-extern void startAudio(unsigned);
+extern void startAudio();
 
 int main()
 {
@@ -97,10 +99,10 @@ int main()
    printf("\n");
 
 #if not defined(HW_NATIVE)
-   unsigned ym2151_clock_hz = vgm_player.start();
-
-   startAudio(ym2151_clock_hz);
+   startAudio();
 #endif
+
+   vgm_player.start(table_vgm);
 
    while(true)
    {

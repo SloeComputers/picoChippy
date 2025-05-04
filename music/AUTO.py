@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #------------------------------------------------------------------------------
-# Copyright (c) 2023 John D. Haughton
+# Copyright (c) 2025 John D. Haughton
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -21,24 +21,8 @@
 # SOFTWARE.
 #------------------------------------------------------------------------------
 
-import math
 import sys
 import table
-
-def sine64(index_6, x):
-   """ Sine lookup table for iG10090 BBD modulator LFO """
-   phase = ((index_6 + 0.5) * math.pi) / 32
-   return int(math.sin(phase) * 32)
-
-
-def linear_interp_filter(index, x):
-   """ Re-construction filter for BBD simulation """
-   if x <= 0.5:
-      y = 2 * x
-   else:
-      y = 2 * (1 - x)
-   return int(y * 0xFFFF)
-
 
 filename = sys.argv[1]
 
@@ -56,11 +40,3 @@ table.gen("vgm",
           typename  = "uint8_t",
           size      = len(data),
           fmt       = '02x')
-
-table.gen("iG10090_sine", func = sine64, typename = "int8_t", log2_size = 6)
-
-table.gen("bbd_filter",
-          func = linear_interp_filter,
-          typename = "uint16_t",
-          log2_size = 8,
-          fmt = "04x")

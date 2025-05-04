@@ -20,10 +20,9 @@
 #  SOFTWARE.
 #-------------------------------------------------------------------------------
 
-set(python_path ${CMAKE_CURRENT_SOURCE_DIR}/../Platform/python)
-
-add_subdirectory(VGM)
 add_subdirectory(hw)
+add_subdirectory(synth)
+add_subdirectory(VGM)
 
 foreach(hw_config ${hw_config_list})
 
@@ -32,6 +31,6 @@ foreach(hw_config ${hw_config_list})
                   audio.cpp)
 
    target_compile_definitions(picoChippy_${hw_config} PRIVATE HW_${hw_config})
-   target_link_libraries(     picoChippy_${hw_config} PRIVATE VGM HW)
+   target_link_libraries(     picoChippy_${hw_config} PRIVATE music VGM HW)
 
 endforeach()

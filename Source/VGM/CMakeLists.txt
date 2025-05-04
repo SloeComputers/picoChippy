@@ -20,36 +20,14 @@
 #  SOFTWARE.
 #-------------------------------------------------------------------------------
 
-add_custom_command(
-   COMMENT
-      "Auto-generate for VGM"
-   COMMAND
-      ${CMAKE_COMMAND}
-         -E env PYTHONPATH=${python_path}
-         ${CMAKE_CURRENT_SOURCE_DIR}/AUTO.py
-             ${CMAKE_CURRENT_SOURCE_DIR}/data/01.vgm
-   DEPENDS
-      ${CMAKE_CURRENT_SOURCE_DIR}/AUTO.py
-      ${CMAKE_CURRENT_SOURCE_DIR}/data/01.vgm
-   OUTPUT
-      ${CMAKE_CURRENT_BINARY_DIR}/Table_vgm.h
-      ${CMAKE_CURRENT_BINARY_DIR}/Table_vgm.cpp
-      ${CMAKE_CURRENT_BINARY_DIR}/Table_iG10090_sine.h
-      ${CMAKE_CURRENT_BINARY_DIR}/Table_iG10090_sine.cpp
-      ${CMAKE_CURRENT_BINARY_DIR}/Table_bbd_filter.h
-      ${CMAKE_CURRENT_BINARY_DIR}/Table_bbd_filter.cpp
-   )
-
-add_library(VGM STATIC
-   Table_vgm.cpp
-   Table_iG10090_sine.cpp
-   Table_bbd_filter.cpp
-   )
+add_library(VGM INTERFACE)
 
 target_include_directories(VGM
-   PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
-   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
-   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..
+   INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/..
+   )
+
+target_link_libraries(VGM
+   INTERFACE synth STB
    )
 
 add_subdirectory(test)

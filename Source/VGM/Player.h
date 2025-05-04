@@ -30,16 +30,10 @@
 #include "Audio.h"
 #include "Decoder.h"
 
-#if defined(HW_NATIVE)
-#include "YM2151/Emulator.h"
-#else
-#include "YM2151/Hardware.h"
-#endif
-#include "SegaPCM/Emulator.h"
+#include "YM2151/Interface.h"
+#include "SegaPCM/Interface.h"
 
 #include "../SynthIO.h"
-
-#include "Table_vgm.h"
 
 namespace VGM {
 
@@ -51,27 +45,27 @@ public:
    {
    }
 
-   unsigned start(unsigned ym2151_clock_hz_ = YM2151_CLOCK_HZ)
+   void init(YM2151::Interface&  ym2151_,
+             SegaPCM::Interface& sega_pcm_)
    {
-      ym2151.download(ym2151_clock_hz_);
-      ym2151.start();
+      ym2151   = &ym2151_;
+      sega_pcm = &sega_pcm_;
+   }
 
+   void start(const uint8_t* vgm_data_)
+   {
       io.displayLCD(0, " Cambridge pico ");
       io.displayLCD(1, " -*- Chippy -*- ");
 
       usleep(1000000);
 
-      decoder.load(table_vgm);
+      decoder.load(vgm_data_);
       decoder.dis();
 
       for(unsigned i = 0; i < NUM_VOICES; ++i)
       {
          voiceInit(i);
       }
-
-      //unsigned sample_rate = ym2151_clock_hz_ / (/* divider */ 2 * /* bits */ 16 * /* chans */ 2);
-
-      return ym2151_clock_hz_;
    }
 
    void tick()
@@ -79,8 +73,7 @@ public:
       decoder.tick();
    }
 
-   Audio             audio{};
-   SegaPCM::Emulator sega_pcm{};
+   Audio audio{};
 
 private:
    void voiceInit(unsigned index_)
@@ -97,25 +90,25 @@ private:
          case 3: op = YM2151::OP_C2; break;
          }
 
-         ym2151.setOp<YM2151::EG_AR>( index_, op, 31);
-         ym2151.setOp<YM2151::EG_D1R>(index_, op, 0);
-         ym2151.setOp<YM2151::EG_D1L>(index_, op, 0);
-         ym2151.setOp<YM2151::EG_D2R>(index_, op, 0);
-         ym2151.setOp<YM2151::EG_RR>( index_, op, 15);
+         ym2151->setOp<YM2151::EG_AR>( index_, op, 31);
+         ym2151->setOp<YM2151::EG_D1R>(index_, op, 0);
+         ym2151->setOp<YM2151::EG_D1L>(index_, op, 0);
+         ym2151->setOp<YM2151::EG_D2R>(index_, op, 0);
+         ym2151->setOp<YM2151::EG_RR>( index_, op, 15);
 
-         ym2151.setOp<YM2151::EG_TL>( index_, op, 10);
+         ym2151->setOp<YM2151::EG_TL>( index_, op, 10);
 
-         ym2151.setOp<YM2151::MUL>(index_, op, 1);
+         ym2151->setOp<YM2151::MUL>(index_, op, 1);
       }
 
       // Config channel
-      ym2151.setCh<YM2151::CONECT>(index_, 7);
-      ym2151.setCh<YM2151::FB>(    index_, 0);
-      ym2151.setCh<YM2151::RL>(    index_, 0b11);
+      ym2151->setCh<YM2151::CONECT>(index_, 7);
+      ym2151->setCh<YM2151::FB>(    index_, 0);
+      ym2151->setCh<YM2151::RL>(    index_, 0b11);
 
-      ym2151.setCh<YM2151::KF>(    index_, 0);
-      ym2151.setCh<YM2151::AMS>(   index_, 0);
-      ym2151.setCh<YM2151::PMS>(   index_, 0);
+      ym2151->setCh<YM2151::KF>(    index_, 0);
+      ym2151->setCh<YM2151::AMS>(   index_, 0);
+      ym2151->setCh<YM2151::PMS>(   index_, 0);
    }
 
    void voiceMute(unsigned index_) override
@@ -124,7 +117,7 @@ private:
 
    void voiceOn(unsigned index_, uint8_t midi_note_, uint8_t velocity_) override
    {
-      decoder.play(&ym2151, &sega_pcm);
+      decoder.play(ym2151, sega_pcm);
 
 #if 0
       static const unsigned table[12] = {0, 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14};
@@ -134,15 +127,15 @@ private:
       unsigned octave = midi_note_ / 12;
       unsigned note   = table[midi_note_ % 12];
 
-      ym2151.setCh<YM2151::KC>(index_, (octave << 4) | note);
+      ym2151->setCh<YM2151::KC>(index_, (octave << 4) | note);
 
-      ym2151.noteOn(index_);
+      ym2151->noteOn(index_);
 #endif
    }
 
    void voiceOff(unsigned index_, uint8_t velocity_) override
    {
-      // ym2151.noteOff(index_);
+      // ym2151->noteOff(index_);
    }
 
    void voicePressure(unsigned index_, uint8_t level_) override
@@ -169,21 +162,11 @@ private:
       }
    }
 
-   static const unsigned YM2151_CLOCK_HZ = 4000000; //!< 4 MHz
+   SynthIO&            io;
+   YM2151::Interface*  ym2151{};
+   SegaPCM::Interface* sega_pcm{};
 
-   SynthIO& io;
-
-#if defined(HW_NATIVE)
-   YM2151::Emulator ym2151{};
-#else
-   YM2151::Hardware<MTL::Pio0,
-                    /* CTRL4    */ MTL::PIN_4,
-                    /* CLK_M    */ MTL::PIN_9,
-                    /* DATA8    */ MTL::PIN_14,
-                    /* REV_DATA */ true> ym2151{};
-#endif
-
-   Decoder decoder{};
+   Decoder  decoder{};
 };
 
 } // namespace VGM

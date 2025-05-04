@@ -29,6 +29,7 @@ project(picoX21H
 include(CTest)
 
 add_subdirectory(Platform)
+add_subdirectory(music)
 add_subdirectory(Source)
 
 if(${PLT_TARGET} STREQUAL rpipico OR ${PLT_TARGET} STREQUAL rpipico2)

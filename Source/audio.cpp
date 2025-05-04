@@ -26,13 +26,32 @@
 
 #include "VGM/Player.h"
 
+#if defined(HW_NATIVE)
+#include "YM2151/Emulator.h"
+#else
+#include "YM2151/Hardware.h"
+#endif
+
+#include "SegaPCM/Emulator.h"
+
 #include "MTL/MTL.h"
 #include "MTL/Pins.h"
 
 #include "MTL/chip/PioYMDAC.h"
 #include "MTL/chip/PioI2S_S16.h"
 
-static MTL::PioYMDAC<MTL::Pio1>   ymdac_in{};
+#if defined(HW_NATIVE)
+static YM2151::Emulator ym2151{};
+#else
+static YM2151::Hardware<MTL::Pio0,
+                        MTL::Pio1,
+                        /* CTRL4    */ MTL::PIN_4,
+                        /* DATA8    */ MTL::PIN_14,
+                        /* REV_DATA */ true> ym2151{};
+#endif
+
+static SegaPCM::Emulator sega_pcm{};
+
 static MTL::PioI2S_S16<MTL::Pio0> i2s_out{};
 
 extern VGM::Player vgm_player;
@@ -45,28 +64,32 @@ static void runDAC()
    while(true)
    {
       vgm_player.tick();
-      vgm_player.sega_pcm.getOut(pcm_left, pcm_right);
+      sega_pcm.getOut(pcm_left, pcm_right);
 
-      ymdac_in.pop(left, right);
+      ym2151.dac_in.pop(left, right);
       vgm_player.audio.process(left, right, pcm_left, pcm_right);
       i2s_out.push((left << 16) | (right & 0xFFFF));
 
-      ymdac_in.pop(left, right);
+      ym2151.dac_in.pop(left, right);
       vgm_player.audio.process(left, right, pcm_left, pcm_right);
       i2s_out.push((left << 16) | (right & 0xFFFF));
    }
 }
 
-void startAudio(unsigned ym2151_clock_hz_)
+void startAudio()
 {
-   ymdac_in.download(ym2151_clock_hz_, /* CLK SD SAM1 */ MTL::PIN_10);
-   ymdac_in.start();
+   static const unsigned YM2151_CLOCK_HZ = 4000000; //!< 4 MHz
 
-   i2s_out.download(ym2151_clock_hz_, /* SD */ MTL::PIN_31, /* LRCLK SCLK */ MTL::PIN_32);
+   ym2151.init(YM2151_CLOCK_HZ,
+               /* CLK M       */ MTL::PIN_9,
+               /* CLK SD SAM1 */ MTL::PIN_10);
+
+   i2s_out.download(YM2151_CLOCK_HZ, /* SD */ MTL::PIN_31, /* LRCLK SCLK */ MTL::PIN_32);
    i2s_out.start();
+
+   vgm_player.init(ym2151, sega_pcm);
 
    MTL_start_core(1, runDAC);
 }
 
 #endif
-

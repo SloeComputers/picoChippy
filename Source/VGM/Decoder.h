@@ -26,7 +26,7 @@
 #include <cstdio>
 #include <unistd.h>
 
-#if defined(HW_NATIVE)
+#if !defined(MTL_TARGET)
 #include <atomic>
 #endif
 
@@ -203,10 +203,11 @@ private:
    const uint8_t* raw;
    unsigned       offset{0};
 
-#if defined(HW_NATIVE)
-   std::atomic<unsigned> samples{0};
-#else
+#if defined(MTL_TARGET)
+   // TODO check/fix std::atomix support in MTL
    volatile unsigned samples{0};
+#else
+   std::atomic<unsigned> samples{0};
 #endif
 };
 

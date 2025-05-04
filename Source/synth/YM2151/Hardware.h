@@ -28,30 +28,31 @@
 
 #include "MTL/Gpio.h"
 #include "MTL/chip/PioClock.h"
+#include "MTL/chip/PioYMDAC.h"
 
 namespace YM2151 {
 
-template <typename PIO_TYPE,
-          unsigned PIN_CTRL4,  // First pin for _IC, A0, _WR and _RD
-          unsigned PIN_CLK_M,  // Pin for CLK_M
-          unsigned PIN_DATA8,  // First pin for D0-D7
-          bool     REV_DATA = false>
+template <typename PIO_SYNTH,
+          typename PIO_DAC,
+          unsigned PIN_CTRL4,       // First pin for _IC, A0, _WR and _RD
+          unsigned PIN_DATA8,       // First pin for D0-D7
+          bool     REV_DATA>        // true => rev data bits
 class Hardware : public Interface
 {
 public:
    Hardware() = default;
 
-   signed download(unsigned clock_freq_)
+   void init(unsigned clock_freq_,
+             unsigned pin_clk_m_,
+             unsigned pin_clk_sd_sam1_)
    {
-      sd = clock.download(pio, clock_freq_, PIN_CLK_M);
-      return sd;
-   }
-
-   void start() override
-   {
+      int sd = clock.download(pio, clock_freq_, pin_clk_m_);
       pio.start(1 << sd);
 
       hardReset();
+
+      dac_in.download(clock_freq_, pin_clk_sd_sam1_);
+      dac_in.start();
    }
 
    //! Initialize bus signals and YM2151 registers uses IC pin
@@ -69,6 +70,8 @@ public:
 
       Interface::hardReset();
    }
+
+   MTL::PioYMDAC<PIO_DAC> dac_in{};
 
 private:
    static uint8_t revBits(uint8_t value_)
@@ -162,8 +165,7 @@ private:
    bool _cs; //!< dummy chip select
 
    MTL::PioClock clock{};  //! Clock out to YM2151
-   PIO_TYPE      pio{};    //! PIO instance
-   int           sd{-1};   //! PIO descriptor
+   PIO_SYNTH     pio{};    //! PIO instance
 };
 
 } // namespace YM2151
