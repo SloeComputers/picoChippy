@@ -30,6 +30,8 @@
 #include <atomic>
 #endif
 
+#include "VGM/Header.h"
+
 #include "YM2151/Interface.h"
 #include "SegaPCM/Interface.h"
 
@@ -52,41 +54,26 @@ public:
 
    void dis()
    {
-      printf("\n");
-      printf("Size       : %u bytes\n", hdr->eof_offset + 4);
-      printf("Version    : %x.%02x\n",  hdr->version >> 8, hdr->version & 0xFF);
-      printf("VGM offset : +0x%x\n",    0x34 + hdr->vgm_data_offset);
-      printf("YM2151 clk : %u Hz\n",    hdr->ym2151_clock);
-      printf("Sega PCMclk: %u Hz\n",    hdr->sega_pcm_clock);
-      printf("Sega PCMifc: 0x%08x\n",   hdr->sega_pcm_interface);
-      printf("\n");
+      hdr->dis();
    }
 
    void play(YM2151::Interface*  ym2151_,
-             SegaPCM::Interface* sega_pcm_)
+             SegaPCM::Interface* sega_pcm_,
+             void*               ym3812_ = nullptr)
    {
       reset();
 
       while(true)
       {
-         uint8_t byte = read8();
+         uint8_t  byte = read8();
+
          switch(byte)
          {
-         case 0x54:
-            {
-               uint8_t addr = read8();
-               uint8_t data = read8();
-   
-               DBG("YM2151[0x%02x] = 0x%02x\n", data, addr);
-
-               ym2151_->writeReg(addr, data);
-            }
-            break;
+         case 0x54: if (ym2151_) ym2151_->writeReg(read8(), read8()); break;
+         // case 0x5A: if (ym3812_) ym3812_->writeReg(read8(), read8()); break;
 
          case 0x61: wait(read16()); break;
-
          case 0x62: wait(735); break;
-
          case 0x63: wait(882); break;
 
          case 0x66: DBG("END\n"); return;
@@ -130,15 +117,7 @@ public:
             wait((byte & 0xF) + 1);
             break;
 
-         case 0xC0:
-            {
-               uint16_t addr = read16();
-               uint8_t  data = read8();
-
-               DBG("SEGA[0x%04x] = 0x%02x\n", addr, data);
-               sega_pcm_->writeReg(addr, data);
-            }
-            break;
+         case 0xC0: if (sega_pcm_) sega_pcm_->writeReg(read16(), read8()); break;
 
          default:
             DBG("ERROR %02X\n", byte);
@@ -173,31 +152,6 @@ private:
       DBG("Wait %u\n", samples_);
       usleep(samples_ * 23);
    }
-
-   struct Header
-   {
-      char     ident[4];
-      uint32_t eof_offset;
-      uint32_t version;
-      uint32_t sn76489_clock;
-
-      uint32_t ym2413_clock;
-      uint32_t gd3_offset;
-      uint32_t total_samples;
-      uint32_t loop_offset;
-
-      uint32_t loop_samples;
-      uint32_t rate;
-      uint16_t sn76489_feedback;
-      uint8_t  sn76489_shit_reg_width;
-      uint8_t  sn76489_flags;
-      uint32_t ym2612_clock;
-
-      uint32_t ym2151_clock;
-      uint32_t vgm_data_offset;
-      uint32_t sega_pcm_clock;
-      uint32_t sega_pcm_interface;
-   };
 
    const Header*  hdr;
    const uint8_t* raw;

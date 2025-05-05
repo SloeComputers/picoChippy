@@ -20,8 +20,8 @@
 #  SOFTWARE.
 #-------------------------------------------------------------------------------
 
-add_library(synth INTERFACE)
+add_library(chip INTERFACE)
 
-target_include_directories(synth
+target_include_directories(chip
    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
    )

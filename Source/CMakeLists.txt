@@ -21,7 +21,7 @@
 #-------------------------------------------------------------------------------
 
 add_subdirectory(hw)
-add_subdirectory(synth)
+add_subdirectory(chip)
 add_subdirectory(VGM)
 
 foreach(hw_config ${hw_config_list})

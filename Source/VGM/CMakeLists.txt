@@ -27,7 +27,7 @@ target_include_directories(VGM
    )
 
 target_link_libraries(VGM
-   INTERFACE synth STB
+   INTERFACE chip STB
    )
 
 add_subdirectory(test)
