@@ -35,4 +35,13 @@ public:
 
    //! Display on text on 16x2 LCD
    void displayLCD(unsigned row_, const char* text);
+
+   //! Start VGM player
+   void triggerVGM();
+
+   //! Set audio volume
+   void setVolume(uint8_t value_);
+
+   //! Set audio balance
+   void setBalance(uint8_t value_);
 };

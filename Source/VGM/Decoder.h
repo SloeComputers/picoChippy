@@ -32,6 +32,7 @@
 
 #include "VGM/Header.h"
 
+#include "SN76489/Interface.h"
 #include "YM2151/Interface.h"
 #include "SegaPCM/Interface.h"
 
@@ -45,21 +46,57 @@ class Decoder
 public:
    Decoder() = default;
 
+   unsigned getClock() const
+   {
+      if (hdr->sn76489_clock != 0)
+         return hdr->sn76489_clock;
+
+      if (hdr->ym2151_clock != 0)
+         return hdr->ym2151_clock;
+
+      if (hdr->sega_pcm_clock != 0)
+         return hdr->sega_pcm_clock;
+
+      return 4000000;
+   }
+
    //! Load VGM image
    void load(const uint8_t* image_)
    {
       raw = image_;
       hdr = (const Header*)raw;
-   }
 
-   void dis()
-   {
       hdr->dis();
    }
 
-   void play(YM2151::Interface*  ym2151_,
-             SegaPCM::Interface* sega_pcm_,
-             void*               ym3812_ = nullptr)
+   void plugSN76489(SN76489::Interface* interface_)
+   {
+      sn76489 = hdr->sn76489_clock != 0 ? interface_
+                                        : nullptr;
+
+      if (sn76489)
+      {
+         sn76489->setClock(hdr->sn76489_clock);
+
+         sn76489->config(hdr->sn76489_shift_reg_width,
+                         hdr->sn76489_feedback,
+                         hdr->sn76489_flags);
+      }
+   }
+
+   void plugYM2151(YM2151::Interface* interface_)
+   {
+      ym2151 = hdr->ym2151_clock != 0 ? interface_
+                                      : nullptr;
+   }
+
+   void plugSegaPCM(SegaPCM::Interface* interface_)
+   {
+      sega_pcm = hdr->sega_pcm_clock != 0 ? interface_
+                                          : nullptr;
+   }
+
+   void play()
    {
       reset();
 
@@ -69,7 +106,9 @@ public:
 
          switch(byte)
          {
-         case 0x54: if (ym2151_) ym2151_->writeReg(read8(), read8()); break;
+         case 0x50: if (sn76489) sn76489->writeReg(read8()); break;
+
+         case 0x54: if (ym2151) ym2151->writeReg(read8(), read8()); break;
          // case 0x5A: if (ym3812_) ym3812_->writeReg(read8(), read8()); break;
 
          case 0x61: wait(read16()); break;
@@ -80,7 +119,7 @@ public:
 
          case 0x67:
             {
-               // assert(raw[offset++] = 0x66);
+               // assert(raw[offset] = 0x66);
    
                skip(1);
                uint8_t  type = read8();
@@ -98,12 +137,12 @@ public:
                   switch(type)
                   {
                   case 0x80:
-                     printf("SEGA ROM %04x/%04x +%04X %p\n", address, rom_size, size, ptr8());
-                     sega_pcm_->addSample(address, ptr8(), size);
+                     DBG("SEGA ROM %04x/%04x +%04X %p\n", address, rom_size, size, ptr8());
+                     sega_pcm->addSample(address, ptr8(), size);
                      break;
 
                   default:
-                     printf("???? ROM %04x/%04x +%04X\n", address, rom_size, size);
+                     DBG("???? ROM %04x/%04x +%04X\n", address, rom_size, size);
                      break;
                   }
                }
@@ -117,7 +156,7 @@ public:
             wait((byte & 0xF) + 1);
             break;
 
-         case 0xC0: if (sega_pcm_) sega_pcm_->writeReg(read16(), read8()); break;
+         case 0xC0: if (sega_pcm) sega_pcm->writeReg(read16(), read8()); break;
 
          default:
             DBG("ERROR %02X\n", byte);
@@ -158,11 +197,15 @@ private:
    unsigned       offset{0};
 
 #if defined(MTL_TARGET)
-   // TODO check/fix std::atomix support in MTL
+   // TODO check/fix std::atomic support in MTL
    volatile unsigned samples{0};
 #else
    std::atomic<unsigned> samples{0};
 #endif
+
+   SN76489::Interface* sn76489{};
+   YM2151::Interface*  ym2151{};
+   SegaPCM::Interface* sega_pcm{};
 };
 
 } // namespace VGM

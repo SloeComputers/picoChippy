@@ -28,7 +28,7 @@
 #include "MTL/MTL.h"
 #endif
 
-#include "VGM/Player.h"
+#include "Synth.h"
 #include "hw/hw.h"
 
 #include "SynthIO.h"
@@ -37,24 +37,24 @@
 
 // -----------------------------------------------------------------------------
 
-static const bool  MIDI_DEBUG      = false;
+static const bool MIDI_DEBUG = false;
 
-static SynthIO     synth_io{};
-static hw::Led     led{};
+static SynthIO synth_io{};
+static hw::Led led{};
 
-VGM::Player vgm_player{synth_io};
+Synth synth{synth_io};
 
 
 // --- Physical MIDI -----------------------------------------------------------
 
-static hw::MidiIn  midi_in{vgm_player, MIDI_DEBUG};
+static hw::MidiIn  midi_in{synth, MIDI_DEBUG};
 
 
 // --- USB MIDI ----------------------------------------------------------------
 
 #if defined(HW_MIDI_USB_DEVICE)
 
-static hw::MidiUSBDevice midi_usb{vgm_player, 0x91C0, "picoChippy", MIDI_DEBUG};
+static hw::MidiUSBDevice midi_usb{synth, 0x91C0, "picoChippy", MIDI_DEBUG};
 
 extern "C" void IRQ_USBCTRL() { midi_usb.usb.irq(); }
 
@@ -80,7 +80,7 @@ void SynthIO::displayLCD(unsigned row, const char* text)
 
 // -----------------------------------------------------------------------------
 
-extern void startAudio();
+extern void startAudio(const uint8_t*);
 
 int main()
 {
@@ -98,11 +98,14 @@ int main()
    printf("Compiler : %s\n", __VERSION__);
    printf("\n");
 
-#if not defined(HW_NATIVE)
-   startAudio();
-#endif
+   synth_io.displayLCD(0, " Cambridge pico ");
+   synth_io.displayLCD(1, " -*- Chippy -*- ");
 
-   vgm_player.start(table_vgm);
+   usleep(1000000);
+
+   startAudio(table_vgm);
+
+   synth.start();
 
    while(true)
    {
@@ -112,7 +115,7 @@ int main()
       midi_usb.tick();
 #endif
 
-      led = vgm_player.isAnyVoiceOn();
+      led = synth.isAnyVoiceOn();
    }
 
    return 0;

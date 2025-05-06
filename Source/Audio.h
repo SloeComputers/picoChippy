@@ -24,8 +24,6 @@
 
 #include <cstdint>
 
-namespace VGM {
-
 class Audio
 {
 public:
@@ -48,5 +46,3 @@ public:
    volatile uint8_t balance{64};
    volatile uint8_t volume{127};
 };
-
-} // namespace VGM

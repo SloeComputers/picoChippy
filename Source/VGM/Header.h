@@ -46,9 +46,27 @@ struct Header
       printf("Loop  samples: %u\n",       loop_samples);
       printf("Rate         : %u\n",       rate);
       printf("\n");
-      if (ym2151_clock)   printf("YM2151 clk   : %u Hz\n", ym2151_clock);
-      if (sega_pcm_clock) printf("SegaPCM clk  : %u Hz ifc=0x%08X\n", sega_pcm_clock, sega_pcm_interface);
-      if (ym3812_clock)   printf("YM3812 clk   : %u Hz\n", ym3812_clock);
+
+      if (sn76489_clock)
+      {
+         printf("SN76489 clk  : %u Hz\n",   sn76489_clock);
+         printf("SN76489 SR sz: %u bits\n", sn76489_shift_reg_width);
+         printf("SN76489 fb   : 0x%04X\n",  sn76489_feedback);
+         printf("SN76489 flag : 0x%02X\n",  sn76489_flags);
+      }
+
+      if (ym2151_clock)
+         printf("YM2151 clk   : %u Hz\n", ym2151_clock);
+
+      if (sega_pcm_clock)
+      {
+         printf("SegaPCM clk  : %u Hz\n", sega_pcm_clock);
+         printf("SegaPCM ifc  : 0x%08X\n", sega_pcm_interface);
+      }
+
+      if (ym3812_clock)
+         printf("YM3812 clk   : %u Hz\n", ym3812_clock);
+
       printf("\n");
    }
 
@@ -68,7 +86,7 @@ struct Header
    uint32_t loop_samples{};
    uint32_t rate{};
    uint16_t sn76489_feedback{};
-   uint8_t  sn76489_shit_reg_width{};
+   uint8_t  sn76489_shift_reg_width{};
    uint8_t  sn76489_flags{};
    uint32_t ym2612_clock{};
 

@@ -20,21 +20,21 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------
 
-// \brief Hardware Interface for Yamaha YM2151
+// \brief Hardware Interface for SN76489
+
+// XXX INCOMPLETE
 
 #pragma once
 
-#include "YM2151/Interface.h"
+#include "SN76489/Interface.h"
 
 #include "MTL/Gpio.h"
 #include "MTL/chip/PioClock.h"
-#include "MTL/chip/PioYMDAC.h"
 
-namespace YM2151 {
+namespace SN76489 {
 
 template <typename PIO_SYNTH,
-          typename PIO_DAC,
-          unsigned PIN_CTRL4,       // First pin for _IC, A0, _WR and _RD
+          unsigned PIN_CTRL3,       // First pin for _CE, _WE and READY
           unsigned PIN_DATA8,       // First pin for D0-D7
           bool     REV_DATA>        // true => rev data bits
 class Hardware : public Interface
@@ -43,37 +43,21 @@ public:
    Hardware() = default;
 
    void init(unsigned clock_freq_,
-             unsigned pin_clk_m_,
-             unsigned pin_clk_sd_sam1_)
+             unsigned pin_clk_)
    {
-      int sd = clock.download(pio, clock_freq_, pin_clk_m_);
+      int sd = clock.download(pio, clock_freq_, pin_clk_);
       pio.start(1 << sd);
 
       hardReset();
-
-      dac_in.download(clock_freq_, pin_clk_sd_sam1_);
-      dac_in.start();
    }
 
-   //! Initialize bus signals and YM2151 registers uses IC pin
+   //! Initialize bus signals
    void hardReset() override
    {
-      data8.setHiZ();
-
-      a0  = A0_ADDR;
-      _cs = _rd = _wr = true;
+      _ce = _wr = true;
       wait_ns(T_AH);
 
-      _ic = false;
-      usleep(T_INIT);
-      _ic = true;
-
-      Interface::hardReset();
-   }
-
-   void getOut(int16_t& left, int16_t& right)
-   {
-      dac_in.pop(left, right);
+      Interface::reset();
    }
 
 private:
@@ -93,58 +77,13 @@ private:
       usleep((nano_seconds_ / 1000) + 1);
    }
 
-   //! Write a byte to the YM2151 bus
-   void writeBus(bool a0_, uint8_t value_) override
+   //! Write a byte to the SN76489 bus
+   void writeBus(uint8_t value_) override
    {
-      data8.setOut();
-
-      a0 = a0_;
-      wait_ns(T_AS);
-
-      _cs = _wr = false;
-      wait_ns(T_CW - T_DS);
-
-      if (REV_DATA)
-         data8 = revBits(value_);
-      else
-         data8 = value_;
-
-      wait_ns(T_DS);
-
-      _cs = _wr = true;
-      wait_ns(T_DH);
-
-      data8.setHiZ();
-   }
-
-   //! Read a byte from the YM2151 bus
-   uint8_t readBus(bool a0_)
-   {
-      data8.setIn();
-
-      a0 = a0_;
-      wait_ns(T_AS);
-
-      _cs = _rd = false;
-      wait_ns(T_ACC);
-
-      uint8_t value;
-      if (REV_DATA)
-         value = revBits(data8);
-      else
-         value = data8;
-
-      _cs = _rd = true;
-      wait_ns(T_DH);
-
-      data8.setHiZ();
-
-      return value;
    }
 
    void waitForReady() override
    {
-      while((readBus(A0_DATA) & (1<<7)) != 0);
    }
 
    static constexpr unsigned T_AS   = 10;    //!< Address setup (ns)
@@ -156,21 +95,15 @@ private:
    static constexpr unsigned T_INIT = 25000; //!< Chip initialisation (ns)
 
    //!< Bi-directional data bus
-   MTL::Gpio::InOut<8, PIN_DATA8> data8;
+   MTL::Gpio::Out<8, PIN_DATA8> data8;
 
    //!< Control signals
-   MTL::Gpio::Out<1, PIN_CTRL4+0> _ic; //!< Initial clear
-   MTL::Gpio::Out<1, PIN_CTRL4+1> a0;  //!< 0=>address, 1=>data
-   MTL::Gpio::Out<1, PIN_CTRL4+2> _wr; //!< Write
-   MTL::Gpio::Out<1, PIN_CTRL4+3> _rd; //!< Read
+   MTL::Gpio::Out<1, PIN_CTRL3+0> _ce;   //!< Chip select
+   MTL::Gpio::Out<1, PIN_CTRL3+1> _wr;   //!< Write enable
+   MTL::Gpio::In<1,  PIN_CTRL3+2> ready; //!< Ready
 
-   // MTL::Gpio::Out<1, PIN_CTRL5+4> _cs; //!< Chip select
-   bool _cs; //!< dummy chip select
-
-   MTL::PioClock clock{};  //! Clock out to YM2151
+   MTL::PioClock clock{};  //! Clock out to SN76489
    PIO_SYNTH     pio{};    //! PIO instance
-
-   MTL::PioYMDAC<PIO_DAC> dac_in{};
 };
 
-} // namespace YM2151
+} // namespace SN76489

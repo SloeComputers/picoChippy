@@ -27,53 +27,32 @@
 
 #include "STB/MIDIInstrument.h"
 
-#include "Audio.h"
-#include "Decoder.h"
-
 #include "YM2151/Interface.h"
 #include "SegaPCM/Interface.h"
 
-#include "../SynthIO.h"
+#include "SynthIO.h"
 
-namespace VGM {
-
-class Player : public MIDI::Instrument</* N */ 8>
+class Synth : public MIDI::Instrument</* N */ 8>
 {
 public:
-   Player(SynthIO& synth_io_)
+   Synth(SynthIO& synth_io_)
       : io(synth_io_)
    {
+      (void) io;
    }
 
-   void init(YM2151::Interface&  ym2151_,
-             SegaPCM::Interface& sega_pcm_)
+   void init(YM2151::Interface&  ym2151_)
    {
-      ym2151   = &ym2151_;
-      sega_pcm = &sega_pcm_;
+      ym2151 = &ym2151_;
    }
 
-   void start(const uint8_t* vgm_data_)
+   void start()
    {
-      io.displayLCD(0, " Cambridge pico ");
-      io.displayLCD(1, " -*- Chippy -*- ");
-
-      usleep(1000000);
-
-      decoder.load(vgm_data_);
-      decoder.dis();
-
       for(unsigned i = 0; i < NUM_VOICES; ++i)
       {
          voiceInit(i);
       }
    }
-
-   void tick()
-   {
-      decoder.tick();
-   }
-
-   Audio audio{};
 
 private:
    void voiceInit(unsigned index_)
@@ -117,7 +96,7 @@ private:
 
    void voiceOn(unsigned index_, uint8_t midi_note_, uint8_t velocity_) override
    {
-      decoder.play(ym2151, sega_pcm);
+      io.triggerVGM();
 
 #if 0
       static const unsigned table[12] = {0, 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14};
@@ -152,21 +131,16 @@ private:
       {
       case 7:
          if (index_ == 0)
-            audio.volume = value_;
+            io.setVolume(value_);
          break;
 
       case 8:
          if (index_ == 0)
-            audio.balance = value_;
+            io.setBalance(value_);
          break;
       }
    }
 
-   SynthIO&            io;
-   YM2151::Interface*  ym2151{};
-   SegaPCM::Interface* sega_pcm{};
-
-   Decoder  decoder{};
+   SynthIO&           io;
+   YM2151::Interface* ym2151;
 };
-
-} // namespace VGM
