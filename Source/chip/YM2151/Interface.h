@@ -198,21 +198,6 @@ public:
       }
    }
 
-   //! Write a field in a register
-   void writeField(uint8_t  addr_,
-                   unsigned ls_bit_,
-                   unsigned bits_,
-                   unsigned data_)
-   {
-      uint8_t data_mask = (1 << bits_) - 1;
-      uint8_t reg_mask  = ~(data_mask << ls_bit_);
-
-      uint8_t data = (shadow[addr_] & reg_mask) |
-                     (data_ & data_mask) << ls_bit_;
-
-      writeReg(addr_, data);
-   }
-
    //! Write a register
    void writeReg(uint8_t addr_, uint8_t data_)
    {
@@ -236,6 +221,21 @@ public:
    }
 
 protected:
+   //! Write a field in a register
+   void writeField(uint8_t  addr_,
+                   unsigned ls_bit_,
+                   unsigned bits_,
+                   unsigned data_)
+   {
+      uint8_t data_mask = (1 << bits_) - 1;
+      uint8_t reg_mask  = ~(data_mask << ls_bit_);
+
+      uint8_t data = (shadow[addr_] & reg_mask) |
+                     (data_ & data_mask) << ls_bit_;
+
+      writeReg(addr_, data);
+   }
+
    //! Write a byte to the YM2151 bus
    virtual void writeBus(bool a0_, uint8_t value_) = 0;
 

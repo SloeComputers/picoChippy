@@ -27,8 +27,7 @@ add_subdirectory(VGM)
 foreach(hw_config ${hw_config_list})
 
    add_executable(picoChippy_${hw_config}
-                  picoChippy.cpp
-                  audio.cpp)
+                  picoChippy.cpp)
 
    target_compile_definitions(picoChippy_${hw_config} PRIVATE HW_${hw_config})
    target_link_libraries(     picoChippy_${hw_config} PRIVATE music VGM HW)

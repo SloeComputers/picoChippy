@@ -26,15 +26,20 @@
 
 #include <cstdint>
 
+#include "STB/MIDIInstrumentBase.h"
+
 #undef  DBG
 #define DBG if (0) printf
 
 namespace SN76489 {
 
-class Interface
+class Interface : public MIDI::InstrumentBase
 {
 public:
-   Interface() = default;
+   Interface()
+      : InstrumentBase(/* num_channels */ 4, /* base_channel */ 0)
+   {
+   }
 
    //! Set clock frequency (Hz)
    virtual void setClock(unsigned clock_) = 0;
@@ -47,7 +52,7 @@ public:
    {
       for(unsigned ch = 0; ch < 4; ++ch)
       {
-         noteOff(ch);
+         voiceOff(ch, 0);
       }
    }
 
@@ -74,27 +79,29 @@ public:
       writeReg(0b11100000 | (rate2_ & 0b11));
    }
 
-   //! Set channel (0-3) attenuation 
-   void setAtten(unsigned channel_, unsigned atten4_)
-   {
-      unsigned reg = 0b001 | (channel_ * 2);
-
-      writeReg(0b10000000 | (reg << 4) | (atten4_ & 0b1111));
-   }
-
    //! Play a note
-   void noteOn(unsigned channel_, unsigned atten4_, unsigned freq10_)
+   void voiceOn(unsigned channel_, uint8_t note_, uint8_t velocity_) override
    {
-      setFreq(channel_, freq10_);
-      setAtten(channel_, atten4_);
+      // setFreq(channel_, freq10_);
+      voicePressure(channel_, velocity_);
    }
 
    //! Stop a note
-   void noteOff(unsigned channel_)
+   void voiceOff(unsigned channel_, uint8_t velocity_) override
    {
-      setAtten(channel_, 0xF);
+      voicePressure(channel_, 0);
    }
 
+   //! Set channel (0-3) attenuation
+   void voicePressure(unsigned channel_, uint8_t level_) override
+   {
+      unsigned reg    = 0b001 | (channel_ * 2);
+      uint8_t  atten4 = (level_>> 3) & 0b1111;
+
+      writeReg(0b10000000 | (reg << 4) | atten4);
+   }
+
+   //! Raw regeister interface
    void writeReg(uint8_t data_)
    {
       DBG("WR %02X\n", data_);

@@ -28,7 +28,6 @@
 #include "STB/MIDIInstrument.h"
 
 #include "YM2151/Interface.h"
-#include "SegaPCM/Interface.h"
 
 #include "SynthIO.h"
 
