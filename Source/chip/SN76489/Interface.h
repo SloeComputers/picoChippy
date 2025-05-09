@@ -26,88 +26,110 @@
 
 #include <cstdint>
 
-#include "STB/MIDIInstrumentBase.h"
+#include "STB/MIDIInstrument.h"
 
 #undef  DBG
 #define DBG if (0) printf
 
 namespace SN76489 {
 
-class Interface : public MIDI::InstrumentBase
+class Interface : public MIDI::Instrument
 {
 public:
    Interface()
-      : InstrumentBase(/* num_channels */ 4, /* base_channel */ 0)
+      : Instrument(/* num_voices */ 3, /* base_channel */ 0)
    {
    }
 
    //! Set clock frequency (Hz)
-   virtual void setClock(unsigned clock_) = 0;
+   virtual void setClock(unsigned clock_, unsigned clock_pin_ = 0) = 0;
 
-   //! Configure shift register size and taps
+   //! Configure shift register size and taps (for emulation)
    virtual void config(unsigned bits_, uint32_t taps_, uint8_t flags_) {}
 
-   //! Initialize all channels
-   void reset()
+   //! Initialize all voices
+   virtual void reset()
    {
-      for(unsigned ch = 0; ch < 4; ++ch)
+      for(unsigned voice = 0; voice < 3; ++voice)
       {
-         voiceOff(ch, 0);
+         setAtten(voice, ATTEN_INF);
+         setFreq( voice, 0x040);
       }
+
+      setAtten(3, ATTEN_INF);
+      selectNoise(NOISE_MID);
    }
 
-   //! Set channel (0-2) frequency
-   void setFreq(unsigned channel_, unsigned freq10_)
+   //! Set voice (0-2) frequency
+   void setFreq(unsigned voice_, unsigned freq10_)
    {
       unsigned freq_ms4 = (freq10_ >> 6) & 0b1111;
       unsigned freq_ls6 = freq10_ & 0b111111;
-      unsigned reg      = channel_ * 2;
+      unsigned reg      = voice_ * 2;
 
       writeReg(0b10000000 | (reg << 4) | freq_ms4);
       writeReg(freq_ls6);
    }
 
-   //! Set channel 3 to noise
+   //! Set voice attenumation dB x 2
+   void setAtten(unsigned voice_, uint8_t atten4_)
+   {
+      unsigned reg = 0b001 | (voice_ * 2);
+
+      writeReg(0b10000000 | (reg << 4) | (atten4_ & 0b1111));
+   }
+
+   //! Set voice 3 to noise
    void selectNoise(unsigned rate2_)
    {
       writeReg(0b11100100 | (rate2_ & 0b11));
    }
 
-   //! Set channel 3 to periodic
+   //! Set voice 3 to periodic
    void selectPeriodic(unsigned rate2_)
    {
       writeReg(0b11100000 | (rate2_ & 0b11));
    }
 
-   //! Play a note
-   void voiceOn(unsigned channel_, uint8_t note_, uint8_t velocity_) override
-   {
-      // setFreq(channel_, freq10_);
-      voicePressure(channel_, velocity_);
-   }
-
-   //! Stop a note
-   void voiceOff(unsigned channel_, uint8_t velocity_) override
-   {
-      voicePressure(channel_, 0);
-   }
-
-   //! Set channel (0-3) attenuation
-   void voicePressure(unsigned channel_, uint8_t level_) override
-   {
-      unsigned reg    = 0b001 | (channel_ * 2);
-      uint8_t  atten4 = (level_>> 3) & 0b1111;
-
-      writeReg(0b10000000 | (reg << 4) | atten4);
-   }
-
-   //! Raw regeister interface
+   //! Raw register interface
    void writeReg(uint8_t data_)
    {
       DBG("WR %02X\n", data_);
 
       writeBus(data_);
    }
+
+//------------------------------------------------------------------------------
+// Implement MIDI::Instrument
+
+   //! Play a note
+   void voiceOn(unsigned voice_, uint8_t note_, uint8_t velocity_) override
+   {
+      setFreq(voice_, note_);
+      setAtten(voice_, (127 - velocity_) >> 3);
+   }
+
+   //! Stop a note
+   void voiceOff(unsigned voice_, uint8_t velocity_) override
+   {
+      setAtten(voice_, ATTEN_INF);
+   }
+
+   //! Set channel (0-3) attenuation
+   void voicePressure(unsigned voice_, uint8_t pressure_) override
+   {
+      setAtten(voice_, (127 - pressure_) >> 3);
+   }
+
+   static const uint8_t ATTEN_NONE = 0x0;
+   static const uint8_t ATTEN_2DB  = 0x1;
+   static const uint8_t ATTEN_INF  = 0xF;
+
+   //! Rates for voice 3 (noise/periodic)
+   static const uint8_t NOISE_LOW    = 0b00;
+   static const uint8_t NOISE_MID    = 0b01;
+   static const uint8_t NOISE_HI     = 0b10;
+   static const uint8_t NOISE_FOLLOW = 0b11;
 
 protected:
    //! Write a byte to the SN76489 bus

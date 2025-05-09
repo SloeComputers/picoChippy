@@ -40,19 +40,20 @@ template <typename PIO_SYNTH,
 class Hardware : public Interface
 {
 public:
-   Hardware() = default;
-
-   void init(unsigned clock_freq_,
-             unsigned pin_clk_)
+   Hardware(unsigned pin_clk_)
+      : pin_clk(pin_clk_)
    {
-      int sd = clock.download(pio, clock_freq_, pin_clk_);
-      pio.start(1 << sd);
-
-      hardReset();
    }
 
-   //! Initialize bus signals
-   void hardReset() override
+   void setClock(unsigned clock_freq_) override
+   {
+      int sd = clock.download(pio, clock_freq_, pin_clk);
+      pio.start(1 << sd);
+
+      reset();
+   }
+
+   void reset() override
    {
       _ce = _wr = true;
       wait_ns(T_AH);
@@ -93,6 +94,8 @@ private:
    static constexpr unsigned T_DH   = 10;    //!< Data read/write hold (ns)
    static constexpr unsigned T_ACC  = 180;   //!< Read data access (ns)
    static constexpr unsigned T_INIT = 25000; //!< Chip initialisation (ns)
+
+   unsigned pin_clk;
 
    //!< Bi-directional data bus
    MTL::Gpio::Out<8, PIN_DATA8> data8;

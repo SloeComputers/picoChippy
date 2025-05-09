@@ -71,7 +71,6 @@ static Audio             audio{};
 static VGM::Decoder      decoder{};
 static SynthIO           synth_io{};
 static Synth             synth{synth_io};
-static hw::Led           led{};
 
 
 // --- Physical MIDI -----------------------------------------------------------
@@ -106,6 +105,14 @@ void SynthIO::displayLCD(unsigned row, const char* text)
 #endif
 }
 
+
+// --- LED ---------------------------------------------------------------------
+
+static hw::Led led{};
+
+
+// -----------------------------------------------------------------------------
+
 void SynthIO::triggerVGM()
 {
    decoder.play();
@@ -133,9 +140,9 @@ static void runDAC()
    while(true)
    {
       decoder.tick();
-      sega_pcm.getOut(pcm_left, pcm_right);
+      //sega_pcm.getOut(pcm_left, pcm_right);
 
-      // pcm_left = pcm_right = sn76489.getOut();
+      pcm_left = pcm_right = sn76489.getOut();
 
       ym2151.getOut(left, right);
       audio.process(left, right, pcm_left, pcm_right);
@@ -201,6 +208,12 @@ int main()
    startAudio();
 
    synth.start();
+
+#if defined(HW_MIDI_USB_DEVICE)
+   midi_usb.setDebug(true);
+   midi_usb.attachInstrument(2, sn76489);
+#endif
+   //midi_in.attachInstrument(3, sega_pcm);
 
    while(true)
    {

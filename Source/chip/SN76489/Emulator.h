@@ -37,7 +37,7 @@ public:
    Emulator() = default;
 
    //! Set sample rate (Hz)
-   void setClock(unsigned clock_) override
+   void setClock(unsigned clock_, unsigned clock_pin_) override
    {
       ticks_per_sample = 128 / CLOCK_DIV;
    }

@@ -31,11 +31,12 @@
 
 #include "SynthIO.h"
 
-class Synth : public MIDI::Instrument</* N */ 8>
+class Synth : public MIDI::Instrument
 {
 public:
    Synth(SynthIO& synth_io_)
-      : io(synth_io_)
+      : MIDI::Instrument(/* N */ 8)
+      , io(synth_io_)
    {
       (void) io;
    }
@@ -47,7 +48,7 @@ public:
 
    void start()
    {
-      for(unsigned i = 0; i < NUM_VOICES; ++i)
+      for(unsigned i = 0; i < num_voices; ++i)
       {
          voiceInit(i);
       }

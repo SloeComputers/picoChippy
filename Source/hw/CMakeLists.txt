@@ -30,7 +30,7 @@ if(${PLT_TARGET} STREQUAL rpipico)
        PWM_DAC
        PARENT_SCOPE)
 
-   target_link_libraries(HW INTERFACE TNY MTL TNY)
+   target_link_libraries(HW INTERFACE TNY MTL)
 
 elseif(${PLT_TARGET} STREQUAL rpipico2)
 
@@ -39,7 +39,7 @@ elseif(${PLT_TARGET} STREQUAL rpipico2)
        PWM_DAC
        PARENT_SCOPE)
 
-   target_link_libraries(HW INTERFACE TNY MTL TNY)
+   target_link_libraries(HW INTERFACE TNY MTL)
 
 elseif(${PLT_TARGET} STREQUAL native)
 
