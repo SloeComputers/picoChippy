@@ -38,10 +38,4 @@ public:
 
    //! Start VGM player
    void triggerVGM();
-
-   //! Set audio volume
-   void setVolume(uint8_t value_);
-
-   //! Set audio balance
-   void setBalance(uint8_t value_);
 };

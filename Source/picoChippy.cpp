@@ -25,7 +25,6 @@
 #include <cstdio>
 
 #include "Synth.h"
-#include "Audio.h"
 #include "SynthIO.h"
 #include "hw/hw.h"
 
@@ -67,7 +66,6 @@ static YM2151::Emulator ym2151{};
 
 static SegaPCM::Emulator sega_pcm{};
 static SN76489::Emulator sn76489{};
-static Audio             audio{};
 static VGM::Decoder      decoder{};
 static SynthIO           synth_io{};
 static Synth             synth{synth_io};
@@ -75,14 +73,14 @@ static Synth             synth{synth_io};
 
 // --- Physical MIDI -----------------------------------------------------------
 
-static hw::MidiIn midi_in{synth, MIDI_DEBUG};
+static hw::MidiIn midi_in{};
 
 
 // --- USB MIDI ----------------------------------------------------------------
 
 #if defined(HW_MIDI_USB_DEVICE)
 
-static hw::MidiUSBDevice midi_usb{synth, 0x91C0, "picoChippy", MIDI_DEBUG};
+static hw::MidiUSBDevice midi_usb{0x91C0, "picoChippy"};
 
 extern "C" void IRQ_USBCTRL() { midi_usb.usb.irq(); }
 
@@ -116,16 +114,6 @@ static hw::Led led{};
 void SynthIO::triggerVGM()
 {
    decoder.play();
-}
-
-void SynthIO::setVolume(uint8_t value_)
-{
-   audio.volume = value_;
-}
-
-void SynthIO::setBalance(uint8_t value_)
-{
-   audio.balance = value_;
 }
 
 // -----------------------------------------------------------------------------
@@ -224,11 +212,18 @@ int main()
    synth.start();
 
 #if defined(HW_MIDI_USB_DEVICE)
-   midi_usb.setDebug(true);
-   midi_usb.attachInstrument(1, ym2151);
+   midi_usb.setDebug(MIDI_DEBUG);
+   midi_usb.attachInstrument(1, synth);
    midi_usb.attachInstrument(2, sn76489);
    midi_usb.attachInstrument(3, sega_pcm);
+   midi_usb.attachInstrument(4, ym2151);
 #endif
+
+   midi_in.setDebug(MIDI_DEBUG);
+   midi_in.attachInstrument(1, synth);
+   midi_in.attachInstrument(2, sn76489);
+   midi_in.attachInstrument(3, sega_pcm);
+   midi_in.attachInstrument(4, ym2151);
 
    decoder.setTickFn(midiIn);
 

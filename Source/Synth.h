@@ -125,22 +125,6 @@ private:
    {
    }
 
-   void voiceControl(unsigned index_, uint8_t control_, uint8_t value_) override
-   {
-      switch(control_)
-      {
-      case 7:
-         if (index_ == 0)
-            io.setVolume(value_);
-         break;
-
-      case 8:
-         if (index_ == 0)
-            io.setBalance(value_);
-         break;
-      }
-   }
-
    SynthIO&           io;
    YM2151::Interface* ym2151;
 };

@@ -43,9 +43,7 @@ namespace hw {
 class MidiIn : public MIDI::Interface
 {
 public:
-   MidiIn(MIDI::Instrument& instrument_, bool debug_)
-      : MIDI::Interface(instrument_, debug_)
-   {}
+   MidiIn() = default;
 
 private:
    bool empty() const override { return uart.empty(); }
@@ -67,9 +65,7 @@ private:
 class MidiIn : public MIDI::Interface
 {
 public:
-   MidiIn(MIDI::Instrument& instrument_, bool debug_)
-      : MIDI::Interface(instrument_, debug_)
-   {}
+   MidiIn() = default;
 
 private:
    bool empty() const override { return n == sizeof(data); }
