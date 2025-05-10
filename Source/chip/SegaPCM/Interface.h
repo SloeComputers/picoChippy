@@ -26,15 +26,20 @@
 
 #include <cstdint>
 
+#include "Chip.h"
+
 #undef  DBG
 #define DBG if (0) printf
 
 namespace SegaPCM {
 
-class Interface
+class Interface : public Chip
 {
 public:
-   Interface() = default;
+   Interface()
+      : Chip("SegaPCM", NUM_CHANNELS)
+   {
+   }
 
    //! Initialize all channels and samples
    void reset()

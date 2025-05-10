@@ -44,6 +44,8 @@ namespace VGM {
 class Decoder
 {
 public:
+   using TickFn = void (*)(void*);
+
    Decoder() = default;
 
    unsigned getClock() const
@@ -170,6 +172,12 @@ public:
       samples++;
    }
 
+   void setTickFn(TickFn fn_, void* ptr_ = nullptr)
+   {
+      tick_fn  = fn_;
+      tick_ptr = ptr_;
+   }
+
 private:
    void reset()
    {
@@ -189,9 +197,15 @@ private:
    void wait(unsigned samples_)
    {
       DBG("Wait %u\n", samples_);
+
+      if (tick_fn != nullptr)
+         (*tick_fn)(tick_ptr);
+
       usleep(samples_ * 23);
    }
 
+   TickFn         tick_fn{nullptr};
+   void*          tick_ptr{};
    const Header*  hdr;
    const uint8_t* raw;
    unsigned       offset{0};

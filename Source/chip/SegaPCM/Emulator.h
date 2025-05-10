@@ -41,10 +41,13 @@ public:
    //! Get next PCM sample pair
    void mixOut(Sample& mix_)
    {
+      Sample out{};
       for(unsigned i = 0; i < NUM_CHANNELS; ++i)
       {
-         chan[i].mixOut(mix_);
+         chan[i].mixOut(out);
       }
+
+      mixer(out, mix_);
    }
 
 private:

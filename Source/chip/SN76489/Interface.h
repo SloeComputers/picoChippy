@@ -37,7 +37,7 @@ class Interface : public Chip
 {
 public:
    Interface()
-      : Chip(/* num_voices */ 3)
+      : Chip("SN76489", /* num_voices */ 3)
    {
    }
 

@@ -26,6 +26,8 @@
 
 #include <cstring>
 
+#include "Chip.h"
+
 #undef  DBG
 #define DBG if (0) printf
 
@@ -59,10 +61,13 @@ static const uint8_t OP_M2  = 0b0100;
 static const uint8_t OP_C2  = 0b1000;
 static const uint8_t OP_ALL = OP_M1 | OP_C1 | OP_M2 | OP_C2;
 
-class Interface
+class Interface : public Chip
 {
 public:
-   Interface() = default;
+   Interface()
+      : Chip("YM215", 8)
+   {
+   }
 
    virtual void start()
    {  

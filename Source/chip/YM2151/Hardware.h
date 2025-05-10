@@ -74,11 +74,10 @@ public:
    void mixOut(Sample& mix_)
    {
       int16_t left, right;
-
       dac_in.pop(left, right);
 
-      mix_.left  += left;
-      mix_.right += right;
+      Sample out{left, right};
+      mixer(out, mix_);
    }
 
 private:

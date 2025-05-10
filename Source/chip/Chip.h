@@ -36,8 +36,10 @@
 class Chip : public MIDI::Instrument
 {
 public:
-   Chip(unsigned num_voices_)
+   Chip(const char* name_,
+        unsigned num_voices_)
       : MIDI::Instrument(num_voices_, /* base_channel */ 0)
+      , name(name_)
    {
       controlUpdate();
    }
@@ -56,7 +58,7 @@ protected:
    }
 
    //! Control a voice
-   virtual void voiceControl(unsigned voice_, uint8_t control_, uint8_t value_)
+   void voiceControl(unsigned voice_, uint8_t control_, uint8_t value_) override
    {
       if (voice_ != 0)
          return;
@@ -86,6 +88,7 @@ private:
       level.right = volume << 8;
    }
 
+   const char*     name{};
    uint8_t         volume{127};
    uint8_t         balance{64};
    volatile Sample level{};

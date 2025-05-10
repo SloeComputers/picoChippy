@@ -51,7 +51,7 @@
 
 // -----------------------------------------------------------------------------
 
-static const bool MIDI_DEBUG = false;
+static const bool MIDI_DEBUG = true;
 
 #if not defined(HW_NATIVE)
 static YM2151::Hardware<MTL::Pio0,
@@ -142,8 +142,8 @@ static void runDAC()
       decoder.tick();
 
       mix_psg_pcm = 0;
-      sega_pcm.mixOut(mix_psg_pcm);
       sn76489.mixOut(mix_psg_pcm);
+      sega_pcm.mixOut(mix_psg_pcm);
 
       final_mix = mix_psg_pcm;
       ym2151.mixOut(final_mix);
@@ -156,6 +156,19 @@ static void runDAC()
 }
 
 #endif
+
+
+// -----------------------------------------------------------------------------
+
+static void midiIn(void* ptr = nullptr)
+{
+   midi_in.tick();
+
+#if defined(HW_MIDI_USB_DEVICE)
+   midi_usb.tick();
+#endif
+}
+
 
 // -----------------------------------------------------------------------------
 
@@ -212,17 +225,16 @@ int main()
 
 #if defined(HW_MIDI_USB_DEVICE)
    midi_usb.setDebug(true);
+   midi_usb.attachInstrument(1, ym2151);
    midi_usb.attachInstrument(2, sn76489);
-   //midi_in.attachInstrument(3, sega_pcm);
+   midi_usb.attachInstrument(3, sega_pcm);
 #endif
+
+   decoder.setTickFn(midiIn);
 
    while(true)
    {
-      midi_in.tick();
-
-#if defined(HW_MIDI_USB_DEVICE)
-      midi_usb.tick();
-#endif
+      midiIn();
 
       led = synth.isAnyVoiceOn();
    }
