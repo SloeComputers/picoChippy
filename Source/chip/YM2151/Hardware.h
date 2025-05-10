@@ -71,9 +71,14 @@ public:
       Interface::hardReset();
    }
 
-   void getOut(int16_t& left, int16_t& right)
+   void mixOut(Sample& mix_)
    {
+      int16_t left, right;
+
       dac_in.pop(left, right);
+
+      mix_.left  += left;
+      mix_.right += right;
    }
 
 private:

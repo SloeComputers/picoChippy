@@ -39,13 +39,11 @@ public:
    Emulator() = default;
 
    //! Get next PCM sample pair
-   void getOut(int32_t& left_, int32_t& right_)
+   void mixOut(Sample& mix_)
    {
-      left_ = right_ = 0;
-
       for(unsigned i = 0; i < NUM_CHANNELS; ++i)
       {
-         chan[i].getOut(left_, right_);
+         chan[i].mixOut(mix_);
       }
    }
 
@@ -112,7 +110,7 @@ private:
       }
 
       //! Get next PCM sample pair
-      void getOut(int32_t& lft_, int32_t& rgt_)
+      void mixOut(Sample& mix_)
       {
          if (memory == nullptr)
             return;
@@ -122,8 +120,8 @@ private:
 
          int32_t value = memory[accum_8 >> 8] - 0x80;
 
-         lft_ += value * lft_vol;
-         rgt_ += value * rgt_vol;
+         mix_.left  += value * lft_vol;
+         mix_.right += value * rgt_vol;
 
          accum_8 += freq_8;
 

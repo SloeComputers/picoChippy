@@ -60,7 +60,7 @@ static YM2151::Hardware<MTL::Pio0,
                         /* DATA8    */ MTL::PIN_14,
                         /* REV_DATA */ true> ym2151{};
 
-static MTL::PioI2S_S16<MTL::Pio0> i2s_out{};
+static MTL::PioI2S_S16<MTL::Pio0> dac{};
 #else
 static YM2151::Emulator ym2151{};
 #endif
@@ -134,23 +134,24 @@ void SynthIO::setBalance(uint8_t value_)
 
 static void runDAC()
 {
-   int32_t pcm_left, pcm_right;
-   int16_t left, right;
+   Sample mix_psg_pcm;
+   Sample final_mix;
 
    while(true)
    {
       decoder.tick();
-      //sega_pcm.getOut(pcm_left, pcm_right);
 
-      pcm_left = pcm_right = sn76489.getOut();
+      mix_psg_pcm = 0;
+      sega_pcm.mixOut(mix_psg_pcm);
+      sn76489.mixOut(mix_psg_pcm);
 
-      ym2151.getOut(left, right);
-      audio.process(left, right, pcm_left, pcm_right);
-      i2s_out.push((left << 16) | (right & 0xFFFF));
+      final_mix = mix_psg_pcm;
+      ym2151.mixOut(final_mix);
+      dac.push(final_mix.pack());
 
-      ym2151.getOut(left, right);
-      audio.process(left, right, pcm_left, pcm_right);
-      i2s_out.push((left << 16) | (right & 0xFFFF));
+      final_mix = mix_psg_pcm;
+      ym2151.mixOut(final_mix);
+      dac.push(final_mix.pack());
    }
 }
 
@@ -175,8 +176,8 @@ void startAudio()
                /* CLK M       */ MTL::PIN_9,
                /* CLK SD SAM1 */ MTL::PIN_10);
 
-   i2s_out.download(clock_hz, /* SD */ MTL::PIN_31, /* LRCLK SCLK */ MTL::PIN_32);
-   i2s_out.start();
+   dac.download(clock_hz, /* SD */ MTL::PIN_31, /* LRCLK SCLK */ MTL::PIN_32);
+   dac.start();
 
    MTL_start_core(1, runDAC);
 #endif
@@ -212,8 +213,8 @@ int main()
 #if defined(HW_MIDI_USB_DEVICE)
    midi_usb.setDebug(true);
    midi_usb.attachInstrument(2, sn76489);
-#endif
    //midi_in.attachInstrument(3, sega_pcm);
+#endif
 
    while(true)
    {

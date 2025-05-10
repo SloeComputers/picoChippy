@@ -48,8 +48,8 @@ public:
       noise.config(bits_, taps_);
    }
 
-   //! Get next sample
-   int16_t getOut()
+   //! Add sample to the mix
+   void mixOut(Sample& mix_)
    {
       int32_t sample{0};
 
@@ -58,7 +58,7 @@ public:
       sample += tone[CH_TONE3].out(ticks_per_sample);
       sample += noise.out(ticks_per_sample);
 
-      return sample / 4;
+      mixer(sample / 4, mix_);
    }
 
 protected:

@@ -26,18 +26,18 @@
 
 #include <cstdint>
 
-#include "STB/MIDIInstrument.h"
+#include "Chip.h"
 
 #undef  DBG
 #define DBG if (0) printf
 
 namespace SN76489 {
 
-class Interface : public MIDI::Instrument
+class Interface : public Chip
 {
 public:
    Interface()
-      : Instrument(/* num_voices */ 3, /* base_channel */ 0)
+      : Chip(/* num_voices */ 3)
    {
    }
 

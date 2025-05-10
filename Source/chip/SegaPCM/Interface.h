@@ -116,8 +116,8 @@ public:
       if (not isSampleIdValid(id_))
          return;
 
-      const Sample* sample = &sample_list[id_ - 1];
-      uint16_t      addr   = (channel_ & CHANNEL_MASK) << 3;
+      const SampleData* sample = &sample_list[id_ - 1];
+      uint16_t          addr   = (channel_ & CHANNEL_MASK) << 3;
 
       writeReg(addr + 0x84, sample->start);
       writeReg(addr + 0x85, sample->start >> 8);
@@ -147,16 +147,16 @@ public:
    }
 
 private:
-   struct Sample;
+   struct SampleData;
 
 protected:
    //! Return a pointer that can be used to translate a sample address
    //! in the original hardware to a local pointer
-   const Sample* getSample(uint32_t hw_addr_) const
+   const SampleData* getSample(uint32_t hw_addr_) const
    {
       for(unsigned i = 0; i < MAX_SAMPLES; ++i)
       {
-         const Sample* sample = &sample_list[i];
+         const SampleData* sample = &sample_list[i];
 
          if (sample->contains(hw_addr_))
             return sample;
@@ -169,7 +169,7 @@ protected:
    //! in the original hardware to a local pointer
    const uint8_t* getSamplePtr(uint32_t hw_addr_) const
    {
-      const Sample* sample = getSample(hw_addr_);
+      const SampleData* sample = getSample(hw_addr_);
       if (sample != nullptr)
       {
          return sample->getPtr();
@@ -186,9 +186,9 @@ protected:
    static const unsigned CHANNEL_MASK = NUM_CHANNELS - 1;
 
 private:
-   struct Sample
+   struct SampleData
    {
-      Sample() = default;
+      SampleData() = default;
 
       //! Sample slot has been setup
       bool isValid() const { return end > start; }
@@ -222,7 +222,7 @@ private:
 
    static const unsigned MAX_SAMPLES = 64; //!< XXX how many is enough?
 
-   Sample sample_list[MAX_SAMPLES];
+   SampleData sample_list[MAX_SAMPLES];
 };
 
 } // namespace SegaPCM
