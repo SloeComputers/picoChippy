@@ -20,8 +20,24 @@
 #  SOFTWARE.
 #-------------------------------------------------------------------------------
 
-add_library(chip INTERFACE)
+add_custom_command(
+   COMMENT
+      "Auto-generate chip tables"
+   COMMAND
+      ${CMAKE_COMMAND}
+         -E env PYTHONPATH=${python_path}
+         ${CMAKE_CURRENT_SOURCE_DIR}/AUTO.py
+   DEPENDS
+      ${CMAKE_CURRENT_SOURCE_DIR}/AUTO.py
+   OUTPUT
+      ${CMAKE_CURRENT_BINARY_DIR}/Table_midi_vol.h
+      ${CMAKE_CURRENT_BINARY_DIR}/Table_midi_vol.cpp
+   )
+
+add_library(chip STATIC
+            Table_midi_vol.cpp)
 
 target_include_directories(chip
-   INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
+   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+   PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
    )
