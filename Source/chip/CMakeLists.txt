@@ -32,10 +32,13 @@ add_custom_command(
    OUTPUT
       ${CMAKE_CURRENT_BINARY_DIR}/Table_midi_vol.h
       ${CMAKE_CURRENT_BINARY_DIR}/Table_midi_vol.cpp
+      ${CMAKE_CURRENT_BINARY_DIR}/Table_note_period.h
+      ${CMAKE_CURRENT_BINARY_DIR}/Table_note_period.cpp
    )
 
 add_library(chip STATIC
-            Table_midi_vol.cpp)
+            Table_midi_vol.cpp
+            Table_note_period.cpp)
 
 target_include_directories(chip
    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}

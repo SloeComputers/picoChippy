@@ -37,9 +37,11 @@ public:
    Emulator() = default;
 
    //! Set sample rate (Hz)
-   void setClock(unsigned clock_, unsigned clock_pin_) override
+   void setClock(unsigned clock_) override
    {
       ticks_per_sample = 128 / CLOCK_DIV;
+
+      SN76489::Interface::setClock(clock_);
    }
 
    //! Configure shift register size and taps
@@ -131,7 +133,6 @@ protected:
       void setPeriod(unsigned value_)
       {
          period = value_;
-         phase  = period;
       }
 
       //! Set MS 4 bits of oscillator period

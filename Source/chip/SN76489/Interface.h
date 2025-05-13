@@ -28,6 +28,8 @@
 
 #include "Chip.h"
 
+#include "Table_note_period.h"
+
 #undef  DBG
 #define DBG if (0) printf
 
@@ -42,7 +44,10 @@ public:
    }
 
    //! Set clock frequency (Hz)
-   virtual void setClock(unsigned clock_, unsigned clock_pin_ = 0) = 0;
+   virtual void setClock(unsigned clock_freq_)
+   {
+      clock_freq = clock_freq_;
+   }
 
    //! Configure shift register size and taps (for emulation)
    virtual void config(unsigned bits_, uint32_t taps_, uint8_t flags_) {}
@@ -53,22 +58,22 @@ public:
       for(unsigned voice = 0; voice < 3; ++voice)
       {
          setAtten(voice, ATTEN_INF);
-         setFreq( voice, 0x040);
+         setPeriod( voice, 0x040);
       }
 
       setAtten(3, ATTEN_INF);
       selectNoise(NOISE_MID);
    }
 
-   //! Set voice (0-2) frequency
-   void setFreq(unsigned voice_, unsigned freq10_)
+   //! Set voice (0-2) square wave half period
+   void setPeriod(unsigned voice_, unsigned period10_)
    {
-      unsigned freq_ms4 = (freq10_ >> 6) & 0b1111;
-      unsigned freq_ls6 = freq10_ & 0b111111;
-      unsigned reg      = voice_ * 2;
+      unsigned period_ls4 = period10_ & 0b1111;
+      unsigned period_ms6 = (period10_ >> 4) & 0b111111;
+      unsigned reg        = voice_ * 2;
 
-      writeReg(0b10000000 | (reg << 4) | freq_ms4);
-      writeReg(freq_ls6);
+      writeReg(0b10000000 | (reg << 4) | period_ls4);
+      writeReg(period_ms6);
    }
 
    //! Set voice attenumation dB x 2
@@ -105,8 +110,9 @@ public:
    //! Play a note
    void voiceOn(unsigned voice_, uint8_t note_, uint8_t velocity_) override
    {
-      setFreq(voice_, note_);
       setAtten(voice_, (127 - velocity_) >> 3);
+      midi_note[voice_] = note_;
+      updatePitch(voice_);
    }
 
    //! Stop a note
@@ -119,6 +125,12 @@ public:
    void voicePressure(unsigned voice_, uint8_t pressure_) override
    {
       setAtten(voice_, (127 - pressure_) >> 3);
+   }
+
+   virtual void voicePitchBend(unsigned voice_, int16_t value_) override
+   {
+      midi_pitch_mod = value_;
+      updatePitch(voice_);
    }
 
    static const uint8_t ATTEN_NONE = 0x0;
@@ -134,6 +146,25 @@ public:
 protected:
    //! Write a byte to the SN76489 bus
    virtual void writeBus(uint8_t value_) = 0;
+
+private:
+   void updatePitch(unsigned voice_)
+   {
+      uint32_t note_7            = (midi_note[voice_] << 7) + (midi_pitch_mod >> 6);
+      uint32_t period_32         = table_note_period[note_7];
+      uint32_t period_18         = (period_32 + 0x2000) >> 14;
+      uint32_t clock_freq_div256 = clock_freq >> 8;
+      unsigned period10          = (period_18 * clock_freq_div256 + 0x200) >> 16;
+
+      if (period10 > 0x3FF)
+         period10 = 0x3FF;
+
+      setPeriod(voice_, period10);
+   }
+
+   unsigned clock_freq{4000000};
+   int16_t  midi_pitch_mod{0};
+   uint8_t  midi_note[3];
 };
 
 }

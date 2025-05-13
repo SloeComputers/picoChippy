@@ -106,7 +106,7 @@ private:
       wait_ns(T_AS);
 
       _cs = _wr = false;
-      wait_ns(T_CW - T_DS);
+      wait_ns(T_CSW - T_DS);
 
       if (REV_DATA)
          data8 = revBits(value_);
@@ -153,7 +153,7 @@ private:
 
    static constexpr unsigned T_AS   = 10;    //!< Address setup (ns)
    static constexpr unsigned T_AH   = 10;    //!< Address hold (ns)
-   static constexpr unsigned T_CW   = 100;   //!< Chip slecet wait (ns)
+   static constexpr unsigned T_CSW  = 100;   //!< Chip slecet width (ns)
    static constexpr unsigned T_DS   = 50;    //!< Data write setup (ns)
    static constexpr unsigned T_DH   = 10;    //!< Data read/write hold (ns)
    static constexpr unsigned T_ACC  = 180;   //!< Read data access (ns)

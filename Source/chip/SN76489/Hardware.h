@@ -47,7 +47,7 @@ public:
 
    void setClock(unsigned clock_freq_) override
    {
-      int sd = clock.download(pio, clock_freq_, pin_clk);
+      int sd = clock.download(pio, clock_freq_);
       pio.start(1 << sd);
 
       reset();

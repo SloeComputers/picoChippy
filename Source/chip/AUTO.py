@@ -34,8 +34,20 @@ def midi_vol(midi_vol_7, x):
    atten_db = (127 - midi_vol_7) * MAX_ATTEN_DB / 126.0
    return int(math.pow(10, -atten_db / 20.0) * 0x7FFF)
 
+def note_period(note7_7, x):
+   """ Convert MIDI note (7 binary places) to period (32 binary places)"""
+   A4_FREQ = 440.0
+   A4_MIDI = 69
+   return int(0x100000000 * math.pow(2, (A4_MIDI - (note7_7 / 128)) / 12) / A4_FREQ)
+
 table.gen("midi_vol",
           func = midi_vol,
           typename = "int16_t",
           log2_size = 7,
           fmt = '04x')
+
+table.gen("note_period",
+          func = note_period,
+          typename = "int32_t",
+          log2_size = 14,
+          fmt = '08x')
