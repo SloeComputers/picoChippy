@@ -67,6 +67,7 @@ static YM2151::Emulator ym2151{};
 static SegaPCM::Emulator sega_pcm{};
 static SN76489::Emulator sn76489{};
 static VGM::Decoder      decoder{};
+
 static SynthIO           synth_io{};
 static Synth             synth{synth_io};
 
@@ -168,8 +169,6 @@ void startAudio()
    decoder.plugYM2151(&ym2151);
    decoder.plugSegaPCM(&sega_pcm);
 
-   synth.init(ym2151);
-
 #if not defined(HW_NATIVE)
    unsigned clock_hz = decoder.getClock();
 
@@ -208,8 +207,6 @@ int main()
    usleep(1000000);
 
    startAudio();
-
-   synth.start();
 
 #if defined(HW_MIDI_USB_DEVICE)
    midi_usb.setDebug(MIDI_DEBUG);

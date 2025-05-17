@@ -186,7 +186,6 @@ protected:
    //! Write a byte to the SegaPCM bus
    virtual void writeBus(uint16_t addr_, uint8_t value_) = 0;
 
-protected:
    static const unsigned NUM_CHANNELS = 16;
    static const unsigned CHANNEL_MASK = NUM_CHANNELS - 1;
 

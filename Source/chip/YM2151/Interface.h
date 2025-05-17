@@ -55,29 +55,62 @@ enum Param
    AMS_EN, KS
 };
 
-static const uint8_t OP_M1  = 0b0001;
-static const uint8_t OP_C1  = 0b0010;
-static const uint8_t OP_M2  = 0b0100;
-static const uint8_t OP_C2  = 0b1000;
-static const uint8_t OP_ALL = OP_M1 | OP_C1 | OP_M2 | OP_C2;
+static const uint8_t  OP_M1  = 0b0001;
+static const uint8_t  OP_C1  = 0b0010;
+static const uint8_t  OP_M2  = 0b0100;
+static const uint8_t  OP_C2  = 0b1000;
+static const uint8_t  OP_ALL = OP_M1 | OP_C1 | OP_M2 | OP_C2;
+static const unsigned NUM_OP = 4;
 
 class Interface : public Chip
 {
 public:
    Interface()
-      : Chip("YM215", 8)
+      : Chip("YM215", /* NUM_VOICE */ 8)
    {
    }
 
-   virtual void start()
-   {  
-      hardReset();
+//------------------------------------------------------------------------------
+// Implement MIDI::Instrument
+
+   //! Play a note
+   void voiceOn(unsigned voice_, uint8_t midi_note_, uint8_t velocity_) override
+   {
+      static const unsigned table[12] = {0, 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14};
+
+      midi_note_ -= 1;
+
+      unsigned octave = midi_note_ / 12;
+      unsigned note   = table[midi_note_ % 12];
+
+      setCh<KC>(voice_, (octave << 4) | note);
+
+      writeReg(0x08, (OP_ALL << 3) | voice_);
    }
+
+   //! Stop a note
+   void voiceOff(unsigned voice_, uint8_t velocity_) override
+   {
+      writeReg(0x08, voice_);
+   }
+
+   //! Set channel (0-3) attenuation
+   void voicePressure(unsigned voice_, uint8_t pressure_) override
+   {
+   }
+
+   virtual void voicePitchBend(unsigned voice_, int16_t value_) override
+   {
+   }
+
+//------------------------------------------------------------------------------
 
    //! 
    virtual void hardReset()
    {
       memset(shadow, 0, sizeof(shadow));
+
+      softReset();
    }
 
    //! Initialize registers to stop all sounds and timer activity
@@ -89,30 +122,32 @@ public:
       set<TIMER_IRQ>(0);  // Disable interrupts
       set<TIMER_CSM>(0);  // Clear CSM
 
-      for(unsigned ch = 0; ch < 8; ch++)
+      for(unsigned voice = 0; voice < 8; voice++)
       {
-         for(unsigned op = 0; op < 4; op++)
+         voiceOff(voice, 0);
+
+         // Config channel operators
+         for(uint8_t op = OP_M1; op < OP_ALL; op <<= 1)
          {
-            setOp<EG_D1L>(ch, op, 0xF);
-            setOp<EG_RR>( ch, op, 0x8);
+            setOp<EG_AR>( voice, op, 31);
+            setOp<EG_D1R>(voice, op, 0);
+            setOp<EG_D1L>(voice, op, 0);
+            setOp<EG_D2R>(voice, op, 0);
+            setOp<EG_RR>( voice, op, 15);
+
+            setOp<EG_TL>( voice, op, 10);
+            setOp<MUL>(   voice, op, 1);
          }
+
+         // Config voice
+         setCh<CONECT>(voice, 7);
+         setCh<FB>(    voice, 0);
+         setCh<RL>(    voice, 0b11);
+
+         setCh<KF>(    voice, 0);
+         setCh<AMS>(   voice, 0);
+         setCh<PMS>(   voice, 0);
       }
-
-      for(unsigned ch = 0; ch < 8; ch++)
-      {
-         noteOff(ch);
-      }
-   }
-
-   void noteOn(unsigned channel_, uint8_t op_mask_ = OP_ALL)
-   {
-      writeReg(0x08, (op_mask_ << 3) | channel_);
-   }
-
-   void noteOff(unsigned channel_, uint8_t op_mask_ = OP_ALL)
-   {
-      op_mask_ = (~op_mask_) & OP_ALL;
-      writeReg(0x08, (op_mask_ << 3) | channel_);
    }
 
    //! Set parameter
