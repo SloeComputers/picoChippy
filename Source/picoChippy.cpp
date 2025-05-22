@@ -83,7 +83,7 @@ static hw::MidiIn midi_in{};
 
 static hw::MidiUSBDevice midi_usb{0x91C0, "picoChippy"};
 
-extern "C" void IRQ_USBCTRL() { midi_usb.usb.irq(); }
+extern "C" void IRQ_USBCTRL() { midi_usb.irq(); }
 
 #endif
 
