@@ -26,6 +26,8 @@
 
 #include "Synth.h"
 #include "SynthIO.h"
+#include "FilePortal.h"
+
 #include "hw/hw.h"
 
 #include "Table_vgm.h"
@@ -68,8 +70,9 @@ static SegaPCM::Emulator sega_pcm{};
 static SN76489::Emulator sn76489{};
 static VGM::Decoder      decoder{};
 
-static SynthIO           synth_io{};
-static Synth             synth{synth_io};
+static FilePortal    file_portal{"picoChippy"};
+static SynthIO       synth_io{};
+static Synth         synth{synth_io};
 
 
 // --- Physical MIDI -----------------------------------------------------------
@@ -79,11 +82,11 @@ static hw::MidiIn midi_in{};
 
 // --- USB MIDI ----------------------------------------------------------------
 
-#if defined(HW_MIDI_USB_DEVICE)
+#if defined(HW_USB_DEVICE)
 
-static hw::MidiUSBDevice midi_usb{0x91C0, "picoChippy"};
+static hw::USBDevice usb{0x91C0, "picoChippy", file_portal};
 
-extern "C" void IRQ_USBCTRL() { midi_usb.irq(); }
+extern "C" void IRQ_USBCTRL() { usb.irq(); }
 
 #endif
 

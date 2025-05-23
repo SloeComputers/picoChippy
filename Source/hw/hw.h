@@ -26,5 +26,5 @@
 
 #include "hw/Lcd.h"
 #include "hw/Led.h"
-#include "hw/MidiUsbDevice.h"
+#include "hw/Usb.h"
 #include "hw/MidiIn.h"
