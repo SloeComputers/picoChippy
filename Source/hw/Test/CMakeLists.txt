@@ -20,21 +20,22 @@
 #  SOFTWARE.
 #-------------------------------------------------------------------------------
 
-set(python_path ${CMAKE_CURRENT_SOURCE_DIR}/../Platform/python)
+set(test_list
+    test_led
+    test_lcd
+    test_phys_midi
+    test_usb_midi
+    test_usb_storage)
 
-add_subdirectory(hw)
-add_subdirectory(chip)
-add_subdirectory(VGM)
+foreach(test ${test_list})
 
-foreach(hw_config ${hw_config_list})
+   add_executable(${test} ${test}.cpp)
 
-   add_executable(picoChippy_${hw_config} picoChippy.cpp)
+   target_compile_definitions(${test} PRIVATE HW_I2S_DAC)
 
-   target_compile_definitions(picoChippy_${hw_config} PRIVATE HW_${hw_config})
-
-   target_link_libraries(picoChippy_${hw_config} PRIVATE music VGM HW)
-
-   set_target_properties(picoChippy_${hw_config} PROPERTIES
+   set_target_properties(${test} PROPERTIES
       RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
+
+   target_link_libraries(${test} PRIVATE HW)
 
 endforeach()

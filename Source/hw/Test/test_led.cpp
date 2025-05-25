@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// Copyright (c) 2024 John D. Haughton
+// Copyright (c) 2025 John D. Haughton
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,11 +20,20 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------
 
-// \brief Hardware interfaces
+// \brief test on-board LED
 
-#pragma once
+#include "hw/hw.h"
 
-#include "hw/Lcd.h"
-#include "hw/Led.h"
-#include "hw/Usb.h"
-#include "hw/PhysMidi.h"
+static hw::Led led{};
+
+int MTL_main()
+{
+   while(true)
+   {
+      usleep(500000);
+
+      led = not led;
+   }
+
+   return 0;
+}

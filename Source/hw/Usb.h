@@ -61,6 +61,45 @@ public:
    MTL::USBMassStorageInterface storage_if;
 };
 
+//! pico micro USB : Just MIDI in
+class USBMIDIDevice
+   : public MIDI::Interface
+   , public MTL::USBDevice
+{
+public:
+   USBMIDIDevice(uint16_t         device_id_,
+                 const char*      device_name_)
+      : MTL::USBDevice("https://github.com/AnotherJohnH",
+                       device_id_, PLT_BCD_VERSION, device_name_,
+                       PLT_COMMIT)
+   {}
+
+   bool empty() const override { return midi_if.empty(); }
+
+   uint8_t rx() override { return midi_if.rx(); }
+
+   void tx(uint8_t byte) override {}
+
+   MTL::USBMidiInterface midi_if{this};
+};
+
+//! pico micro USB : Just mass storage
+class USBStorageDevice
+   : public MTL::USBDevice
+{
+public:
+   USBStorageDevice(uint16_t         device_id_,
+                    const char*      device_name_,
+                    STB::FileSystem& file_system_)
+      : MTL::USBDevice("https://github.com/AnotherJohnH",
+                       device_id_, PLT_BCD_VERSION, device_name_,
+                       PLT_COMMIT)
+      , storage_if{this, file_system_}
+   {}
+
+   MTL::USBMassStorageInterface storage_if;
+};
+
 #endif
 
 } // namespace hw

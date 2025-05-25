@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// Copyright (c) 2024 John D. Haughton
+// Copyright (c) 2025 John D. Haughton
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,11 +20,40 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------
 
-// \brief Hardware interfaces
+#include "hw/hw.h"
 
-#pragma once
+#include <cstdio>
+#include <cstring>
 
-#include "hw/Lcd.h"
-#include "hw/Led.h"
-#include "hw/Usb.h"
-#include "hw/PhysMidi.h"
+#include "STB/FAT/FAT16.h"
+
+class FileSystem: public STB::FAT16<6>
+{
+public:
+   FileSystem()
+      : STB::FAT16<6>("HW_TEST")
+   {
+      static const char* readme_txt = "Hello, world!";
+
+      addFile("README.txt", strlen(readme_txt), (uint8_t*)readme_txt);
+   }
+};
+
+#if defined(HW_USB_DEVICE)
+
+static FileSystem file_system;
+
+static hw::USBStorageDevice usb{0x91C0, "HW-Test", file_system};
+
+extern "C" void IRQ_USBCTRL() { usb.irq(); }
+
+#endif
+
+static hw::Led led{};
+
+signed MTL_main()
+{
+   printf("TEST USB STORAGE\n");
+
+   return 0;
+}

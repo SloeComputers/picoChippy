@@ -77,7 +77,7 @@ static Synth         synth{synth_io};
 
 // --- Physical MIDI -----------------------------------------------------------
 
-static hw::MidiIn midi_in{};
+static hw::PhysMidi phys_midi{};
 
 
 // --- USB MIDI ----------------------------------------------------------------
@@ -154,10 +154,10 @@ static void runDAC()
 
 static void midiIn(void* ptr = nullptr)
 {
-   midi_in.tick();
+   phys_midi.tick();
 
-#if defined(HW_MIDI_USB_DEVICE)
-   midi_usb.tick();
+#if defined(HW_USB_DEVICE)
+   usb.tick();
 #endif
 }
 
@@ -210,19 +210,19 @@ int main()
 
    startAudio();
 
-#if defined(HW_MIDI_USB_DEVICE)
-   midi_usb.setDebug(MIDI_DEBUG);
-   midi_usb.attachInstrument(1, synth);
-   midi_usb.attachInstrument(2, sn76489);
-   midi_usb.attachInstrument(3, sega_pcm);
-   midi_usb.attachInstrument(4, ym2151);
+#if defined(HW_USB_DEVICE)
+   usb.setDebug(MIDI_DEBUG);
+   usb.attachInstrument(1, synth);
+   usb.attachInstrument(2, sn76489);
+   usb.attachInstrument(3, sega_pcm);
+   usb.attachInstrument(4, ym2151);
 #endif
 
-   midi_in.setDebug(MIDI_DEBUG);
-   midi_in.attachInstrument(1, synth);
-   midi_in.attachInstrument(2, sn76489);
-   midi_in.attachInstrument(3, sega_pcm);
-   midi_in.attachInstrument(4, ym2151);
+   phys_midi.setDebug(MIDI_DEBUG);
+   phys_midi.attachInstrument(1, synth);
+   phys_midi.attachInstrument(2, sn76489);
+   phys_midi.attachInstrument(3, sega_pcm);
+   phys_midi.attachInstrument(4, ym2151);
 
    decoder.setTickFn(midiIn);
 

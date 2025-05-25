@@ -32,6 +32,8 @@ if(${PLT_TARGET} STREQUAL rpipico)
 
    target_link_libraries(HW INTERFACE TNY MTL)
 
+   add_subdirectory(Test)
+
 elseif(${PLT_TARGET} STREQUAL rpipico2)
 
    set(hw_config_list
@@ -40,6 +42,8 @@ elseif(${PLT_TARGET} STREQUAL rpipico2)
        PARENT_SCOPE)
 
    target_link_libraries(HW INTERFACE TNY MTL)
+
+   add_subdirectory(Test)
 
 elseif(${PLT_TARGET} STREQUAL native)
 

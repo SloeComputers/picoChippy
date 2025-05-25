@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// Copyright (c) 2024 John D. Haughton
+// Copyright (c) 2025 John D. Haughton
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,11 +20,60 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------
 
-// \brief Hardware interfaces
+// \brief test I2C 16x2 LCD hardware
 
-#pragma once
+#include "hw/hw.h"
 
-#include "hw/Lcd.h"
-#include "hw/Led.h"
-#include "hw/Usb.h"
-#include "hw/PhysMidi.h"
+#include <cstdio>
+
+static hw::Led led{};
+
+#if not defined(HW_LCD_NONE)
+static hw::Lcd lcd{};
+#endif
+
+int MTL_main()
+{
+#if not defined(HW_LCD_NONE)
+   uint8_t ch[8]
+   {
+      0b00000,
+      0b00100,
+      0b01110,
+      0b10101,
+      0b00100,
+      0b00100,
+      0b00100,
+      0b00000
+   };
+
+   lcd.progChar(0, ch);
+#endif
+
+   unsigned n = 0;
+
+   while(true)
+   {
+      usleep(100000);
+
+      char text[16];
+      sprintf(text, "Hello %u", n++);
+
+#if not defined(HW_LCD_NONE)
+      lcd.move(0, 0);
+      lcd.print(text);
+
+      lcd.move(0, 1);
+      lcd.print("World!");
+
+      lcd.move(15, 1);
+      lcd.putchar('\0');
+#endif
+
+      printf("%s\n", text);
+
+      led = not led;
+   }
+
+   return 0;
+}

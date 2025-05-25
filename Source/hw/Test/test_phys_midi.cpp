@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// Copyright (c) 2024 John D. Haughton
+// Copyright (c) 2025 John D. Haughton
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,11 +20,52 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------
 
-// \brief Hardware interfaces
+#include "hw/hw.h"
 
-#pragma once
+#include <cstdio>
 
-#include "hw/Lcd.h"
-#include "hw/Led.h"
-#include "hw/Usb.h"
-#include "hw/PhysMidi.h"
+static hw::PhysMidi midi{};
+
+static hw::Led led{};
+
+signed MTL_main()
+{
+   printf("\nMIDI Test\n");
+
+   while(true)
+   {
+      uint8_t  byte = midi.rx();
+      unsigned cmd  = byte >> 4;
+
+      led = not led;
+
+      if (cmd < 0x8)
+      {
+         // Ignore until sycnhronised
+      }
+      else if (cmd == 0xF)
+      {
+         // SYSTEM
+      }
+      else
+      {
+         unsigned channel = byte & 0xF;
+
+         switch(cmd)
+         {
+         case 0x8: printf("CH%u NOTE OFF %3u %3u\n", channel, midi.rx(), midi.rx()); break;
+         case 0x9: printf("CH%u NOTE ON  %3u %3u\n", channel, midi.rx(), midi.rx()); break;
+         case 0xA: printf("CH%u NOTE PRE %3u %3u\n", channel, midi.rx(), midi.rx()); break;
+         case 0xB: printf("CH%u CTRL     %3u %3u\n", channel, midi.rx(), midi.rx()); break;
+         case 0xC: printf("CH%u PROG     %3u %3u\n", channel, midi.rx());            break;
+         case 0xD: printf("CH%u PRES     %3u\n",     channel, midi.rx());            break;
+         case 0xE: printf("CH%u PTCH     %d\n",      channel, midi.rx(), midi.rx()); break;
+
+         default:
+            break;
+         }
+      }
+   }
+
+   return 0;
+}
