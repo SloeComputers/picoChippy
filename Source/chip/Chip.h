@@ -44,6 +44,8 @@ public:
       controlUpdate();
    }
 
+   const char* getName() const { return name; }
+
 protected:
    //! Common audio processing for mono synth chips
    void mixer(int16_t mono_, Sample& mix_)

@@ -70,7 +70,7 @@ static SegaPCM::Emulator sega_pcm{};
 static SN76489::Emulator sn76489{};
 static VGM::Decoder      decoder{};
 
-static FilePortal    file_portal{"picoChippy"};
+static FilePortal    file_portal{"picoChippy", decoder};
 static SynthIO       synth_io{};
 static Synth         synth{synth_io};
 
@@ -166,12 +166,6 @@ static void midiIn(void* ptr = nullptr)
 
 void startAudio()
 {
-   decoder.load(table_vgm);
-
-   decoder.plugSN76489(&sn76489);
-   decoder.plugYM2151(&ym2151);
-   decoder.plugSegaPCM(&sega_pcm);
-
 #if not defined(HW_NATIVE)
    unsigned clock_hz = decoder.getClock();
 
@@ -208,6 +202,11 @@ int main()
    synth_io.displayLCD(1, " -*- Chippy -*- ");
 
    usleep(1000000);
+
+   decoder.load(table_vgm);
+   decoder.plugSN76489(&sn76489);
+   decoder.plugYM2151(&ym2151);
+   decoder.plugSegaPCM(&sega_pcm);
 
    startAudio();
 
