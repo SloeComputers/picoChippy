@@ -60,7 +60,7 @@ Build a single hardware target e.g. rpipico2 using cmake...
 
 flashable images will be found under the build sub-directory here...
 
-    build/Source/picoChippy_I2S_DAC.uf2
+    build/rpipico2/picoChippy_I2S_DAC.uf2
 
 ## License
 

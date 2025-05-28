@@ -35,6 +35,7 @@
 #include "SN76489/Interface.h"
 #include "YM2151/Interface.h"
 #include "SegaPCM/Interface.h"
+#include "OKIM6295/Interface.h"
 
 #undef  DBG
 #define DBG if (0) printf
@@ -98,20 +99,42 @@ public:
                                           : nullptr;
    }
 
+   void plugOKIM6295(OKIM6295::Interface* interface_)
+   {
+      oki_m6295 = hdr->oki_m6295_clock != 0 ? interface_
+                                            : nullptr;
+   }
+
    void play()
    {
       reset();
 
       while(true)
       {
-         uint8_t  byte = read8();
+         uint16_t addr16;
+         uint8_t  addr;
+         uint8_t  data;
+
+         uint8_t byte = read8();
 
          switch(byte)
          {
-         case 0x50: if (sn76489) sn76489->writeReg(read8()); break;
+         case 0x50:
+            data = read8();
+            if (sn76489) sn76489->writeReg(data);
+            break;
 
-         case 0x54: if (ym2151) ym2151->writeReg(read8(), read8()); break;
-         // case 0x5A: if (ym3812_) ym3812_->writeReg(read8(), read8()); break;
+         case 0x54:
+            addr = read8();
+            data = read8();
+            if (ym2151) ym2151->writeReg(addr, data);
+            break;
+
+         case 0x5A:
+             addr = read8();
+             data = read8();
+             // if (ym3812) ym2812->writeReg(addr, data);
+             break;
 
          case 0x61: wait(read16()); break;
          case 0x62: wait(735); break;
@@ -143,6 +166,11 @@ public:
                      sega_pcm->addSample(address, ptr8(), size);
                      break;
 
+                  case 0x8B:
+                     DBG("OKI M6295 ROM %04x/%04x +%04X %p\n", address, rom_size, size, ptr8());
+                     oki_m6295->addRomImage(address, ptr8(), size);
+                     break;
+
                   default:
                      DBG("???? ROM %04x/%04x +%04X\n", address, rom_size, size);
                      break;
@@ -158,7 +186,17 @@ public:
             wait((byte & 0xF) + 1);
             break;
 
-         case 0xC0: if (sega_pcm) sega_pcm->writeReg(read16(), read8()); break;
+         case 0xB8:
+            addr = read8();
+            data = read8();
+            if (oki_m6295) oki_m6295->writeReg(data); break;
+            break;
+
+         case 0xC0:
+            addr16 = read16();
+            data   = read8();
+            if (sega_pcm) sega_pcm->writeReg(addr16, data);
+            break;
 
          default:
             DBG("ERROR %02X\n", byte);
@@ -217,9 +255,10 @@ private:
    std::atomic<unsigned> samples{0};
 #endif
 
-   SN76489::Interface* sn76489{};
-   YM2151::Interface*  ym2151{};
-   SegaPCM::Interface* sega_pcm{};
+   SN76489::Interface*  sn76489{};
+   YM2151::Interface*   ym2151{};
+   SegaPCM::Interface*  sega_pcm{};
+   OKIM6295::Interface* oki_m6295{};
 };
 
 } // namespace VGM

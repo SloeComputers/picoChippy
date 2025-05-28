@@ -67,13 +67,16 @@ struct Header
       if (ym3812_clock)
          printf("YM3812 clk   : %u Hz\n", ym3812_clock);
 
+      if (oki_m6295_clock)
+         printf("OKIM6295 clk : %u Hz\n", oki_m6295_clock);
+
       printf("\n");
    }
 
    static const unsigned VERSION_MAJOR = 0x1;  // XXX BCD
    static const unsigned VERSION_MINOR = 0x51; // XXX BCD
 
-   char     ident[4] = {'V', 'g', 'm', '\0'};
+   char     ident[4] = {'V', 'g', 'm', ' '};
    uint32_t eof_offset{};
    uint32_t version{(VERSION_MAJOR << 8) | VERSION_MINOR};
    uint32_t sn76489_clock{};
@@ -114,6 +117,16 @@ struct Header
    uint32_t ay8910_clock{};
    uint32_t ayt_ay_flags{};
    uint32_t vm___lb_lm{};
+
+   uint32_t gb_dmg_clock{};
+   uint32_t nes_apu_clock{};
+   uint32_t multipcm_clock{};
+   uint32_t upd7759_clock{};
+
+   uint32_t oki_m6258_clock{};
+   uint32_t of_kf_cf{};
+   uint32_t oki_m6295_clock{};
+   uint32_t k051649_clock{};
 };
 
 } // namespace VGM

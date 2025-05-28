@@ -35,6 +35,7 @@
 #include "YM2151/Emulator.h"
 #include "SN76489/Emulator.h"
 #include "SegaPCM/Emulator.h"
+#include "OKIM6295/Emulator.h"
    
 #include "VGM/Decoder.h"
 
@@ -66,9 +67,10 @@ static MTL::PioI2S_S16<MTL::Pio0> dac{};
 static YM2151::Emulator ym2151{};
 #endif
 
-static SegaPCM::Emulator sega_pcm{};
-static SN76489::Emulator sn76489{};
-static VGM::Decoder      decoder{};
+static SegaPCM::Emulator  sega_pcm{};
+static SN76489::Emulator  sn76489{};
+static OKIM6295::Emulator oki_m6295{};
+static VGM::Decoder       decoder{};
 
 static FilePortal    file_portal{"picoChippy", decoder};
 static SynthIO       synth_io{};
@@ -207,6 +209,7 @@ int main()
    decoder.plugSN76489(&sn76489);
    decoder.plugYM2151(&ym2151);
    decoder.plugSegaPCM(&sega_pcm);
+   decoder.plugOKIM6295(&oki_m6295);
 
    startAudio();
 
