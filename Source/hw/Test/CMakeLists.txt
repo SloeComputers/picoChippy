@@ -29,7 +29,7 @@ set(test_list
 
 foreach(test ${test_list})
 
-   add_executable(${test} ${test}.cpp)
+   add_executable(${test} ${test}.cpp fault_handler.cpp)
 
    target_compile_definitions(${test} PRIVATE HW_I2S_DAC)
 

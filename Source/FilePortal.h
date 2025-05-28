@@ -87,7 +87,7 @@ private:
          "</body>"
       "</html>";
 
-   uint8_t vgm_file[128 * 1024] = {};
+   uint8_t vgm_file[384 * 1024] = {};
 
    VGM::Decoder& decoder;
 };

@@ -39,9 +39,9 @@ public:
    }
 };
 
-#if defined(HW_USB_DEVICE)
-
 static FileSystem file_system;
+
+#if defined(HW_USB_DEVICE)
 
 static hw::USBStorageDevice usb{0x91C0, "HW-Test", file_system};
 
@@ -53,7 +53,15 @@ static hw::Led led{};
 
 signed MTL_main()
 {
-   printf("TEST USB STORAGE\n");
+   printf("\n\n-------------------------------\n");
+   printf("TEST USB STORAGE\n\n");
+
+   while(true)
+   {
+      usleep(50000);
+
+      led = not led;
+   }
 
    return 0;
 }
