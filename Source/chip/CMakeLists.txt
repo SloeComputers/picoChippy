@@ -20,21 +20,8 @@
 #  SOFTWARE.
 #-------------------------------------------------------------------------------
 
-add_custom_command(
-   COMMENT
-      "Auto-generate chip tables"
-   COMMAND
-      ${CMAKE_COMMAND}
-         -E env PYTHONPATH=${python_path}
-         ${CMAKE_CURRENT_SOURCE_DIR}/AUTO.py
-   DEPENDS
-      ${CMAKE_CURRENT_SOURCE_DIR}/AUTO.py
-   OUTPUT
-      ${CMAKE_CURRENT_BINARY_DIR}/Table_midi_vol.h
-      ${CMAKE_CURRENT_BINARY_DIR}/Table_midi_vol.cpp
-      ${CMAKE_CURRENT_BINARY_DIR}/Table_note_period.h
-      ${CMAKE_CURRENT_BINARY_DIR}/Table_note_period.cpp
-   )
+autogen_py(Table_midi_vol)
+autogen_py(Table_note)
 
 add_library(chip STATIC
             Table_midi_vol.cpp

@@ -20,6 +20,8 @@
 #  SOFTWARE.
 #-------------------------------------------------------------------------------
 
+autogen_py(Table_sine)
+
 set(test_list
     test_dac
     test_led
@@ -30,7 +32,7 @@ set(test_list
 
 foreach(test ${test_list})
 
-   add_executable(${test} ${test}.cpp fault_handler.cpp)
+   add_executable(${test} ${test}.cpp Table_sine.cpp fault_handler.cpp)
 
    target_compile_definitions(${test} PRIVATE HW_I2S_DAC)
 

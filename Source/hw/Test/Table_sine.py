@@ -1,6 +1,5 @@
-#!/usr/bin/env python3
 #------------------------------------------------------------------------------
-# Copyright (c) 2023 John D. Haughton
+# Copyright (c) 2025 John D. Haughton
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -21,33 +20,13 @@
 # SOFTWARE.
 #------------------------------------------------------------------------------
 
+""" Sine lookup table """
+
 import math
 import table
-import sys
 
-def midi_vol(midi_vol_7, x):
-   """ Convert MIDI volume to a normalized gain """
-   # Hard code zero => infinite attenuation 
-   if midi_vol_7 == 0:
-      return 0
-   MAX_ATTEN_DB = 60
-   atten_db = (127 - midi_vol_7) * MAX_ATTEN_DB / 126.0
-   return int(math.pow(10, -atten_db / 20.0) * 0x7FFF)
-
-def note_period(note7_7, x):
-   """ Convert MIDI note (7 binary places) to period (32 binary places)"""
-   A4_FREQ = 440.0
-   A4_MIDI = 69
-   return int(0x100000000 * math.pow(2, (A4_MIDI - (note7_7 / 128)) / 12) / A4_FREQ)
-
-table.gen("midi_vol",
-          func = midi_vol,
+table.gen("sine",
+          func = lambda i, x : int(0x7FFF * math.sin(x * math.pi / 2)),
           typename = "int16_t",
-          log2_size = 7,
+          log2_size = 8,
           fmt = '04x')
-
-table.gen("note_period",
-          func = note_period,
-          typename = "int32_t",
-          log2_size = 14,
-          fmt = '08x')
