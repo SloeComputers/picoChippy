@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include "hw/Dac.h"
 #include "hw/Lcd.h"
 #include "hw/Led.h"
 #include "hw/Usb.h"

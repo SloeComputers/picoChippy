@@ -43,7 +43,7 @@ static FileSystem file_system;
 
 #if defined(HW_USB_DEVICE)
 
-static hw::USBStorageDevice usb{0x91C0, "HW-Test", file_system};
+static hw::USBDevice usb{0x91C0, "HW-Test", file_system};
 
 extern "C" void IRQ_USBCTRL() { usb.irq(); }
 

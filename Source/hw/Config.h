@@ -28,7 +28,7 @@
 
 #define HW_DESCR "I2S DAC"
 
-#define HW_DAC_I2S_ANY
+#define HW_DAC_I2S
 #define HW_USB_DEVICE
 #define HW_MIDI_IN_UART1
 #define HW_LED

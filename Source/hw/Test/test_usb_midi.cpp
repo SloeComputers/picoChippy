@@ -24,9 +24,13 @@
 
 #include <cstdio>
 
+#include "STB/FAT/FAT16.h"
+
 #if defined(HW_USB_DEVICE)
 
-static hw::USBMIDIDevice usb{0x91C0, "HW-Test"};
+static STB::FAT16<6> file_system{"HW_TEST"};
+
+static hw::USBDevice usb{0x91C0, "HW-Test", file_system};
 
 extern "C" void IRQ_USBCTRL() { usb.irq(); }
 

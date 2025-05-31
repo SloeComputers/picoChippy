@@ -20,45 +20,83 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------
 
-// \brief USB Device
+// \brief Digital to Analogue Convectior
 
 #pragma once
 
-#include "STB/MIDIInterface.h"
 #include "hw/Config.h"
 
-#if defined(HW_USB_DEVICE)
-#include "MTL/USBMidiInterface.h"
-#include "MTL/USBMassStorageInterface.h"
+#if defined(HW_DAC_I2S)
+#include "MTL/chip/PioI2S_S16.h"
+
+#elif defined(HW_DAC_PWM)
+#include "MTL/chip/PwmAudio.h"
+
+#elif defined(HW_DAC_NATIVE)
+#include "PLT/Audio.h"
+
+#else
+#error "DAC config not set"
 #endif
 
 namespace hw {
 
-#if defined(HW_USB_DEVICE)
+#if defined(HW_DAC_I2S)
 
-//! pico micro USB : MIDI in and storage interface
-class USBDevice
-   : public MIDI::Interface
-   , public MTL::USBDevice
+class Dac
 {
 public:
-   USBDevice(uint16_t         device_id_,
-             const char*      device_name_,
-             STB::FileSystem& file_system_)
-      : MTL::USBDevice("https://github.com/AnotherJohnH",
-                       device_id_, PLT_BCD_VERSION, device_name_,
-                       PLT_COMMIT)
-      , storage_if{this, file_system_}
-   {}
+   Dac() = default;
 
-   bool empty() const override { return midi_if.empty(); }
+   void start(unsigned clock_hz_)
+   {
+      i2s.download(clock_hz_, /* SD */ MTL::PIN_31, /* LRCLK SCLK */ MTL::PIN_32);
+      i2s.start();
+   }
 
-   uint8_t rx() override { return midi_if.rx(); }
+   void push(uint32_t sample_pair_)
+   {
+      i2s.push(sample_pair_);
+   }
 
-   void tx(uint8_t byte) override {}
+private:
+   MTL::PioI2S_S16<MTL::Pio0> i2s{};
+};
 
-   MTL::USBMidiInterface        midi_if{this};
-   MTL::USBMassStorageInterface storage_if;
+#elif defined(HW_DAC_PWM)
+
+class Dac
+{
+public:
+   Dac() = default;
+
+   void start(unsigned clock_hz_)
+   {
+   }
+
+   void push(uint32_t sample_pair_)
+   {
+   }
+
+private:
+};
+
+#elif defined(HW_DAC_NATIVE)
+
+class Dac
+{
+public:
+   Dac() = default;
+
+   void start(unsigned clock_hz_)
+   {
+   }
+
+   void push(uint32_t sample_pair_)
+   {
+   }
+
+private:
 };
 
 #endif

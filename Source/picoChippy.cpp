@@ -24,11 +24,11 @@
 
 #include <cstdio>
 
+#include "hw/hw.h"
+
 #include "Synth.h"
 #include "SynthIO.h"
 #include "FilePortal.h"
-
-#include "hw/hw.h"
 
 #include "Table_vgm.h"
 
@@ -39,33 +39,26 @@
    
 #include "VGM/Decoder.h"
 
-#if not defined(HW_NATIVE)
-
-#include "MTL/MTL.h"
-#include "MTL/Pins.h"
-   
-#include "MTL/chip/PioI2S_S16.h"
-   
-#include "YM2151/Hardware.h"
-
-#endif
-
-
 // -----------------------------------------------------------------------------
 
 static const bool MIDI_DEBUG = true;
 
 #if not defined(HW_NATIVE)
+
+#include "MTL/MTL.h"
+#include "MTL/Pins.h"
+#include "YM2151/Hardware.h"
+
 static YM2151::Hardware<MTL::Pio0,
                         MTL::Pio1,
                         /* CTRL4    */ MTL::PIN_4,
                         /* DATA8    */ MTL::PIN_14,
                         /* REV_DATA */ true> ym2151{};
-
-static MTL::PioI2S_S16<MTL::Pio0> dac{};
 #else
 static YM2151::Emulator ym2151{};
 #endif
+
+static hw::Dac dac{};
 
 static SegaPCM::Emulator  sega_pcm{};
 static SN76489::Emulator  sn76489{};
@@ -168,16 +161,17 @@ static void midiIn(void* ptr = nullptr)
 
 void startAudio()
 {
-#if not defined(HW_NATIVE)
    unsigned clock_hz = decoder.getClock();
 
+#if not defined(HW_NATIVE)
    ym2151.init(clock_hz,
                /* CLK M       */ MTL::PIN_9,
                /* CLK SD SAM1 */ MTL::PIN_10);
+#endif
 
-   dac.download(clock_hz, /* SD */ MTL::PIN_31, /* LRCLK SCLK */ MTL::PIN_32);
-   dac.start();
+   dac.start(clock_hz);
 
+#if not defined(HW_NATIVE)
    MTL_start_core(1, runDAC);
 #endif
 }
@@ -191,14 +185,8 @@ int main()
    printf("\e[1,1H");
 
    printf("\n");
-   printf("Program  : Cambridge pico Chippy (%s)\n", HW_DESCR);
-   printf("Author   : Copyright (c) 2025 John D. Haughton\n");
-   printf("License  : MIT\n");
-   printf("Version  : %s\n", PLT_VERSION);
-   printf("Commit   : %s\n", PLT_COMMIT);
-   printf("Built    : %s %s\n", __TIME__, __DATE__);
-   printf("Compiler : %s\n", __VERSION__);
-   printf("\n");
+
+   puts(file_portal.getReadme());
 
    synth_io.displayLCD(0, " Cambridge pico ");
    synth_io.displayLCD(1, " -*- Chippy -*- ");

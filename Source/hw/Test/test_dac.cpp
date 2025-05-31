@@ -20,47 +20,31 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------
 
-// \brief USB Device
+// \brief test on-board LED
 
-#pragma once
+#include "hw/hw.h"
 
-#include "STB/MIDIInterface.h"
-#include "hw/Config.h"
+static hw::Dac dac{};
 
-#if defined(HW_USB_DEVICE)
-#include "MTL/USBMidiInterface.h"
-#include "MTL/USBMassStorageInterface.h"
-#endif
+static hw::Led led{};
 
-namespace hw {
-
-#if defined(HW_USB_DEVICE)
-
-//! pico micro USB : MIDI in and storage interface
-class USBDevice
-   : public MIDI::Interface
-   , public MTL::USBDevice
+int MTL_main()
 {
-public:
-   USBDevice(uint16_t         device_id_,
-             const char*      device_name_,
-             STB::FileSystem& file_system_)
-      : MTL::USBDevice("https://github.com/AnotherJohnH",
-                       device_id_, PLT_BCD_VERSION, device_name_,
-                       PLT_COMMIT)
-      , storage_if{this, file_system_}
-   {}
+   printf("\nDAC Test\n");
 
-   bool empty() const override { return midi_if.empty(); }
+   dac.start(48000);
 
-   uint8_t rx() override { return midi_if.rx(); }
+   while(true)
+   {
+      for(unsigned i = 0; i < 24000; ++i)
+      {
+         uint32_t sample{0};
 
-   void tx(uint8_t byte) override {}
+         dac.push(sample);
+      }
 
-   MTL::USBMidiInterface        midi_if{this};
-   MTL::USBMassStorageInterface storage_if;
-};
+      led = not led;
+   }
 
-#endif
-
-} // namespace hw
+   return 0;
+}

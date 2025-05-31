@@ -20,47 +20,44 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------
 
-// \brief USB Device
+#include <unistd.h>
+#include <cstdio>
 
-#pragma once
+#include "MTL/MTL.h"
+#include "MTL/Pins.h"
+#include "MTL/Digital.h"
 
-#include "STB/MIDIInterface.h"
-#include "hw/Config.h"
-
-#if defined(HW_USB_DEVICE)
-#include "MTL/USBMidiInterface.h"
-#include "MTL/USBMassStorageInterface.h"
-#endif
-
-namespace hw {
-
-#if defined(HW_USB_DEVICE)
-
-//! pico micro USB : MIDI in and storage interface
-class USBDevice
-   : public MIDI::Interface
-   , public MTL::USBDevice
+void MTL_fault(unsigned excep_num_, uint32_t* fault_stack_ptr_)
 {
-public:
-   USBDevice(uint16_t         device_id_,
-             const char*      device_name_,
-             STB::FileSystem& file_system_)
-      : MTL::USBDevice("https://github.com/AnotherJohnH",
-                       device_id_, PLT_BCD_VERSION, device_name_,
-                       PLT_COMMIT)
-      , storage_if{this, file_system_}
-   {}
+   // Prevent console out using IRQs (as they won't work)
+   MTL_nobuff();
 
-   bool empty() const override { return midi_if.empty(); }
+   printf("\n\nFAULT: #%u\n", excep_num_, fault_stack_ptr_[6]);
 
-   uint8_t rx() override { return midi_if.rx(); }
+   printf("R0  = %08x  R1 = %08x  R2 = %08x  R3 = %08x\n",
+          fault_stack_ptr_[0], fault_stack_ptr_[1],
+          fault_stack_ptr_[2], fault_stack_ptr_[3]);
 
-   void tx(uint8_t byte) override {}
+   printf("R12 = %08x                 LR = %08x  PC = %08x\n",
+          fault_stack_ptr_[4], fault_stack_ptr_[5],
+          fault_stack_ptr_[6]);
 
-   MTL::USBMidiInterface        midi_if{this};
-   MTL::USBMassStorageInterface storage_if;
-};
+   printf("PSR = %08x\n", fault_stack_ptr_[7]);
 
-#endif
+   MTL::Digital::Out<MTL::PIN_LED1> onboard_led;
 
-} // namespace hw
+   while(true)
+   {
+      for(unsigned i = 0; i < excep_num_; ++i)
+      {
+         onboard_led = true;
+         usleep(100000);
+
+         onboard_led = false;
+         usleep(100000);
+      }
+
+      usleep(1000000);
+   }
+}
+
