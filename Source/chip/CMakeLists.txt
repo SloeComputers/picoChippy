@@ -21,7 +21,7 @@
 #-------------------------------------------------------------------------------
 
 autogen_py(Table_midi_vol)
-autogen_py(Table_note)
+autogen_py(Table_note_period)
 
 add_library(chip STATIC
             Table_midi_vol.cpp

@@ -169,7 +169,9 @@ void startAudio()
                /* CLK SD SAM1 */ MTL::PIN_10);
 #endif
 
-   dac.start(clock_hz);
+   unsigned sample_rate_hz = clock_hz / 64;
+
+   dac.start(sample_rate_hz);
 
 #if not defined(HW_NATIVE)
    MTL_start_core(1, runDAC);

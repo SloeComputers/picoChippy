@@ -20,23 +20,7 @@
 #  SOFTWARE.
 #-------------------------------------------------------------------------------
 
-set(python_path ${CMAKE_CURRENT_SOURCE_DIR}/../Platform/python)
-
-add_custom_command(
-   COMMENT
-      "Auto-generate VGM image"
-   COMMAND
-      ${CMAKE_COMMAND}
-         -E env PYTHONPATH=${python_path}
-         ${CMAKE_CURRENT_SOURCE_DIR}/AUTO.py
-             ${CMAKE_CURRENT_SOURCE_DIR}/demo.vgm
-   DEPENDS
-      ${CMAKE_CURRENT_SOURCE_DIR}/AUTO.py
-      ${CMAKE_CURRENT_SOURCE_DIR}/demo.vgm
-   OUTPUT
-      ${CMAKE_CURRENT_BINARY_DIR}/Table_vgm.h
-      ${CMAKE_CURRENT_BINARY_DIR}/Table_vgm.cpp
-   )
+autogen_py(Table_vgm ${CMAKE_CURRENT_SOURCE_DIR}/demo.vgm)
 
 add_library(music STATIC
    Table_vgm.cpp)

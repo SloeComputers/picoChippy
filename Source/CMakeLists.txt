@@ -20,24 +20,6 @@
 #  SOFTWARE.
 #-------------------------------------------------------------------------------
 
-function(autogen_py NAME)
-
-   add_custom_command(
-      COMMENT
-         "Auto-generate ${NAME}"
-      COMMAND
-         ${CMAKE_COMMAND}
-         -E env PYTHONPATH=${CMAKE_SOURCE_DIR}/Platform/python
-         python3 ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.py
-      DEPENDS
-         ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.py
-      OUTPUT
-         ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.h
-         ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.cpp
-     )
-
-endfunction()
-
 add_subdirectory(hw)
 add_subdirectory(chip)
 add_subdirectory(VGM)
