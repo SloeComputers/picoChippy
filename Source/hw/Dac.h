@@ -48,9 +48,11 @@ class Dac
 public:
    Dac() = default;
 
-   void start(unsigned clock_hz_)
+   void start(unsigned sample_rate_)
    {
-      i2s.download(clock_hz_, /* SD */ MTL::PIN_31, /* LRCLK SCLK */ MTL::PIN_32);
+      i2s.download(sample_rate_ * BITS_PER_FRAME * 2,
+                   /* SD */ MTL::PIN_31,
+                   /* LRCLK SCLK */ MTL::PIN_32);
       i2s.start();
    }
 
@@ -60,6 +62,8 @@ public:
    }
 
 private:
+   static const unsigned BITS_PER_FRAME = 32;
+
    MTL::PioI2S_S16<MTL::Pio0> i2s{};
 };
 
@@ -70,7 +74,7 @@ class Dac
 public:
    Dac() = default;
 
-   void start(unsigned clock_hz_)
+   void start(unsigned sample_rate_)
    {
    }
 
@@ -88,7 +92,7 @@ class Dac
 public:
    Dac() = default;
 
-   void start(unsigned clock_hz_)
+   void start(unsigned sample_rate_)
    {
    }
 

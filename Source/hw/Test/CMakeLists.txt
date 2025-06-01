@@ -36,6 +36,10 @@ foreach(test ${test_list})
 
    target_compile_definitions(${test} PRIVATE HW_I2S_DAC)
 
+   target_include_directories(${test}
+      PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
+      )
+
    set_target_properties(${test} PROPERTIES
       RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 
