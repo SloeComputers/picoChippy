@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// Copyright (c) 2024 John D. Haughton
+// Copyright (c) 2025 John D. Haughton
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -24,35 +24,61 @@
 
 #pragma once
 
+#if not defined(HW_NATIVE)
+#include "MTL/Config.h"
+#endif
+
+//------------------------------------------------------------------------------
 #if defined(HW_I2S_DAC)
 
-#define HW_DESCR "I2S DAC"
+#define HW_DESCR          "I2S DAC"
+
+#define HW_USB_DEVICE
+#define HW_LED
+
+#define HW_LCD_I2C        MTL::I2C1_P24_P25
+#define HW_LCD_I2C_ADDR   0x3E
+
+#define HW_MIDI_IN_UART   MTL::Uart1_P26_P27
 
 #define HW_DAC_I2S
-#define HW_USB_DEVICE
-#define HW_MIDI_IN_UART1
-#define HW_LED
-#define HW_LCD_I2C
-#define HW_LCD_I2C_ADDR 0x3E
+#define HW_DAC_I2S_SD     MTL::PIN_31
+#define HW_DAC_I2S_CLKS   MTL::PIN_32
 
+#define HW_YM2151
+#define HW_YM2151_CTRL4   MTL::PIN_4
+#define HW_YM2151_CLK     MTL::PIN_9
+#define HW_YM2151_DAC_IN  MTL::PIN_10
+#define HW_YM2151_DATA8   MTL::PIN_14
+
+
+//------------------------------------------------------------------------------
 #elif defined(HW_PWM_DAC)
 
-#define HW_DESCR "PWM DAC"
+#define HW_DESCR          "PWM DAC"
 
-#define HW_DAC_PWM
 #define HW_USB_DEVICE
-#define HW_MIDI_IN_UART1
 #define HW_LED
-#define HW_LCD_I2C
-#define HW_LCD_I2C_ADDR 0x3E
 
+#define HW_LCD_I2C        MTL::I2C1_P24_P25
+#define HW_LCD_I2C_ADDR   0x3E
+
+#define HW_MIDI_IN_UART   MTL::Uart1_P26_P27
+
+#define HW_DAC_PWM        MTL::PIN_26
+
+
+//------------------------------------------------------------------------------
 #elif defined(HW_NATIVE)
 
-#define HW_DESCR "native"
+#define HW_DESCR          "native"
 
-#define HW_DAC_NATIVE
 #define HW_MIDI_IN_NATIVE
 
+#define HW_DAC_NATIVE
+
+
+//------------------------------------------------------------------------------
 #else
 
 #error "Target hardware not specified"

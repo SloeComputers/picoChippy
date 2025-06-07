@@ -46,13 +46,17 @@ namespace hw {
 class Dac
 {
 public:
-   Dac() = default;
+   Dac()
+   {
+      MTL::config.gpio(HW_DAC_I2S_SD,       "I2S SD");
+      MTL::config.gpio(HW_DAC_I2S_CLKS,     "I2S SCLK");
+      MTL::config.gpio(HW_DAC_I2S_CLKS + 1, "I2S LRCLK");
+   }
 
    void start(unsigned sample_rate_)
    {
       i2s.download(sample_rate_ * BITS_PER_FRAME * 2,
-                   /* SD */ MTL::PIN_31,
-                   /* LRCLK SCLK */ MTL::PIN_32);
+                   HW_DAC_I2S_SD, HW_DAC_I2S_CLKS);
       i2s.start();
    }
 

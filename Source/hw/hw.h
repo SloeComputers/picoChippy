@@ -25,7 +25,7 @@
 #pragma once
 
 #include "hw/Dac.h"
+#include "hw/PhysMidi.h"
 #include "hw/Lcd.h"
 #include "hw/Led.h"
 #include "hw/Usb.h"
-#include "hw/PhysMidi.h"

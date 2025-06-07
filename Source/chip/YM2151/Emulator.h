@@ -33,9 +33,17 @@ class Emulator : public Interface
 public:
    Emulator() = default;
 
-   signed download(unsigned clock_freq_)
+   void start(unsigned clock_freq_)
    {
-      return 0;
+   }
+
+   void mixOut(Sample& mix_)
+   {
+      int16_t left{0};
+      int16_t right{0};
+
+      Sample out{left, right};
+      mixer(out, mix_);
    }
 
 private:

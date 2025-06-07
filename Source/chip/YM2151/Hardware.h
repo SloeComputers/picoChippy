@@ -80,6 +80,11 @@ public:
       mixer(out, mix_);
    }
 
+   static constexpr unsigned _IC = PIN_CTRL4 + 0;
+   static constexpr unsigned A0  = PIN_CTRL4 + 1;
+   static constexpr unsigned _WR = PIN_CTRL4 + 2;
+   static constexpr unsigned _RD = PIN_CTRL4 + 3;
+
 private:
    static uint8_t revBits(uint8_t value_)
    {
@@ -163,10 +168,10 @@ private:
    MTL::Gpio::InOut<8, PIN_DATA8> data8;
 
    //!< Control signals
-   MTL::Gpio::Out<1, PIN_CTRL4+0> _ic; //!< Initial clear
-   MTL::Gpio::Out<1, PIN_CTRL4+1> a0;  //!< 0=>address, 1=>data
-   MTL::Gpio::Out<1, PIN_CTRL4+2> _wr; //!< Write
-   MTL::Gpio::Out<1, PIN_CTRL4+3> _rd; //!< Read
+   MTL::Gpio::Out<1, _IC> _ic; //!< Initial clear
+   MTL::Gpio::Out<1, A0>  a0;  //!< 0=>address, 1=>data
+   MTL::Gpio::Out<1, _WR> _wr; //!< Write
+   MTL::Gpio::Out<1, _RD> _rd; //!< Read
 
    // MTL::Gpio::Out<1, PIN_CTRL5+4> _cs; //!< Chip select
    bool _cs; //!< dummy chip select
