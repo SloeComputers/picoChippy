@@ -32,7 +32,7 @@ dependent source...
 
     git clone --recurse https://github.com/AnotherJohnH/picoChippy.git
 
-ore
+or
 
     git clone --recurse ssh://git@github.com/AnotherJohnH/picoChippy.git
 
@@ -42,6 +42,7 @@ ore
 + arm-none-eabi-gcc
 + cmake via UNIX make or auto detection of ninja if installed
 + Python3
++ SDL2 (only for native test target)
 
 ### Build
 
