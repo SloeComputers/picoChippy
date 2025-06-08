@@ -22,27 +22,21 @@
 
 autogen_py(Table_sine)
 
-set(test_list
-    test_dac
-    test_led
-    test_lcd
-    test_phys_midi
-    test_usb_midi
-    test_usb_storage)
+foreach(hw_config I2S_DAC PWM_DAC)
 
-foreach(test ${test_list})
+   add_executable(test_hw_${hw_config}
+      Table_sine.cpp
+      test_hw.cpp)
 
-   add_executable(${test} ${test}.cpp Table_sine.cpp fault_handler.cpp)
-
-   target_compile_definitions(${test} PRIVATE HW_I2S_DAC)
-
-   target_include_directories(${test}
+   target_include_directories(test_hw_${hw_config}
       PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
       )
 
-   set_target_properties(${test} PROPERTIES
-      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
+   target_compile_definitions(test_hw_${hw_config} PRIVATE HW_${hw_config})
 
-   target_link_libraries(${test} PRIVATE HW)
+   target_link_libraries(test_hw_${hw_config} PRIVATE HW)
+
+   set_target_properties(test_hw_${hw_config} PROPERTIES
+      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 endforeach()
