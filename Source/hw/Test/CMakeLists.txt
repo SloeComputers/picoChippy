@@ -22,7 +22,7 @@
 
 autogen_py(Table_sine)
 
-foreach(hw_config I2S_DAC PWM_DAC)
+foreach(hw_config ${hw_config_list})
 
    add_executable(test_hw_${hw_config}
       Table_sine.cpp

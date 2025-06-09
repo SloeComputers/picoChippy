@@ -36,11 +36,6 @@ struct Sample
    {
    }
 
-   uint32_t pack() const
-   {
-      return (left << 16) | (right & 0xFFFF);
-   }
-
    int16_t operator=(int32_t value_)
    {
       return left = right = value_;

@@ -26,11 +26,12 @@
 
 #include "hw/Config.h"
 
-#if defined(HW_DAC_I2S)
+#if defined(HW_DAC_I2S) || defined(HW_DAC_I2S_WAVESHARE_REV2_1)
 #include "MTL/chip/PioI2S_S16.h"
 
 #elif defined(HW_DAC_PWM)
-#include "MTL/chip/PwmAudio.h"
+#include "MTL/chip/Pll.h"
+#include "MTL/chip/Pwm.h"
 
 #elif defined(HW_DAC_NATIVE)
 #include "PLT/Audio.h"
@@ -60,13 +61,18 @@ public:
       i2s.start();
    }
 
-   void push(uint32_t sample_pair_)
+   void push(int16_t left_, int16_t right_)
    {
-      i2s.push(sample_pair_);
+      i2s.push(packSamples(left_, right_));
    }
 
 private:
    static const unsigned BITS_PER_FRAME = 32;
+
+   static uint32_t packSamples(int16_t left_, int16_t right_)
+   {
+      return (left_ << 16) | uint16_t(right_);
+   }
 
    MTL::PioI2S_S16<MTL::Pio0> i2s{};
 };
@@ -76,17 +82,71 @@ private:
 class Dac
 {
 public:
-   Dac() = default;
+   Dac()
+   {
+      MTL::config.gpio(HW_DAC_PWM, "PWM (Audio out)");
+   }
 
    void start(unsigned sample_rate_)
    {
    }
 
-   void push(uint32_t sample_pair_)
+   void push(int16_t left_, int16_t right_)
    {
+      pwm = packSamples(left_, right_);
    }
 
 private:
+   static const unsigned BITS   = 8;
+   static const uint32_t LIMIT  = 1 << BITS;
+   static const uint32_t OFFSET = LIMIT / 2;
+
+   //! Re-format a pair of 16-bit signed samples for the PWM
+   static uint32_t packSamples(int16_t left_, int16_t right_)
+   {
+      uint32_t left  = OFFSET + (left_  >> (16 - BITS));
+      uint32_t right = OFFSET + (right_ >> (16 - BITS));
+
+      return (left << 16) | right;
+   }
+
+   MTL::Pwm<HW_DAC_PWM,/* PAIR */ true> pwm{/* clock_div_8_4 */ 0b10000, LIMIT};
+};
+
+#elif defined(HW_DAC_I2S_WAVESHARE_REV2_1)
+
+class Dac
+{
+public:
+   Dac()
+   {
+      MTL::config.gpio(HW_DAC_I2S_SD,       "I2S SD");
+      MTL::config.gpio(HW_DAC_I2S_CLKS,     "I2S SCLK");
+      MTL::config.gpio(HW_DAC_I2S_CLKS + 1, "I2S LRCLK");
+      MTL::config.gpio(HW_DAC_I2S_MCLK,     "I2S MCLK");
+   }
+
+   void start(unsigned sample_rate_)
+   {
+      i2s.download(sample_rate_ * BITS_PER_FRAME * 2,
+                   HW_DAC_I2S_SD, HW_DAC_I2S_CLKS);
+      i2s.start();
+   }
+
+   void push(int16_t left_, int16_t right_)
+   {
+      i2s.push(packSamples(left_, right_));
+   }
+
+private:
+   static uint32_t packSamples(int16_t left_, int16_t right_)
+   {
+      return (left_ << 16) | uint16_t(right_);
+   }
+
+   static const unsigned BITS_PER_FRAME = 32;
+
+   MTL::PioI2S_S16<MTL::Pio0> i2s{};
 };
 
 #elif defined(HW_DAC_NATIVE)
@@ -100,7 +160,7 @@ public:
    {
    }
 
-   void push(uint32_t sample_pair_)
+   void push(int16_t left_, int16_t right_)
    {
    }
 

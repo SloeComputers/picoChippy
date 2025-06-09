@@ -127,11 +127,11 @@ static void runDAC()
 
       final_mix = mix_psg_pcm;
       ym2151.mixOut(final_mix);
-      dac.push(final_mix.pack());
+      dac.push(final_mix.left, final_mix.right);
 
       final_mix = mix_psg_pcm;
       ym2151.mixOut(final_mix);
-      dac.push(final_mix.pack());
+      dac.push(final_mix.left, final_mix.right);
    }
 }
 #endif

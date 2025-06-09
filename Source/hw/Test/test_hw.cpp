@@ -23,6 +23,7 @@
 #include "hw/hw.h"
 
 #include <cstdio>
+#include <unistd.h>
 
 enum Phase { DECL, INFO, START, RUN };
 
@@ -127,17 +128,16 @@ static void runDAC()
 
       for(unsigned i = 0; i < (SAMPLE_RATE / 2); ++i)
       {
-         int16_t  sample      = table_sine[phase >> FRAC_BITS];
-         uint32_t sample_pair = sample << 16 | (sample & 0xFFFF);
+         int16_t sample = table_sine[phase >> FRAC_BITS];
 
          phase += PHASE_INC;
 
-         dac_ptr->push(sample_pair);
+         dac_ptr->push(sample, sample);
       }
 
       for(unsigned i = 0; i < (SAMPLE_RATE / 2); ++i)
       {
-         dac_ptr->push(0);
+         dac_ptr->push(0, 0);
       }
    }
 }
