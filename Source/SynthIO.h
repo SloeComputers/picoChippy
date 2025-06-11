@@ -36,6 +36,6 @@ public:
    //! Display on text on 16x2 LCD
    void displayLCD(unsigned row_, const char* text);
 
-   //! Start VGM player
-   void triggerVGM();
+   //! Start/stop VGM player
+   void playVGM(bool start_);
 };

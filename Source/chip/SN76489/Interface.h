@@ -39,14 +39,8 @@ class Interface : public Chip
 {
 public:
    Interface()
-      : Chip("SN76489", /* num_voices */ 3)
+      : Chip("SN76489", /* num_voices */ 3, /* ticks_per_sample */ 128)
    {
-   }
-
-   //! Set clock frequency (Hz)
-   virtual void setClock(unsigned clock_freq_)
-   {
-      clock_freq = clock_freq_;
    }
 
    //! Configure shift register size and taps (for emulation)

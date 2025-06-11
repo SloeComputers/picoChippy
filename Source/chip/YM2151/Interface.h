@@ -66,7 +66,7 @@ class Interface : public Chip
 {
 public:
    Interface()
-      : Chip("YM215", /* NUM_VOICE */ 8)
+      : Chip("YM2151", /* num_voices */ 8, /* clock_ticks_per_sample */ 64)
    {
    }
 

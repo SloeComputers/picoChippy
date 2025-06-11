@@ -103,9 +103,12 @@ static hw::Led led{};
 
 // -----------------------------------------------------------------------------
 
-void SynthIO::triggerVGM()
+void SynthIO::playVGM(bool start_)
 {
-   decoder.play();
+   if (start_)
+      decoder.play();
+   else
+      decoder.stop();
 }
 
 // -----------------------------------------------------------------------------
@@ -118,7 +121,7 @@ static void runDAC()
 
    while(true)
    {
-      decoder.tick();
+      decoder.sample();
 
       mix_psg_pcm = 0;
       sn76489.mixOut(mix_psg_pcm);
@@ -139,25 +142,12 @@ static void runDAC()
 
 // -----------------------------------------------------------------------------
 
-static void midiIn(void* ptr = nullptr)
-{
-   phys_midi.tick();
-
-#if defined(HW_USB_DEVICE)
-   usb.tick();
-#endif
-}
-
-
-// -----------------------------------------------------------------------------
-
 void startAudio()
 {
-   unsigned clock_hz       = decoder.getClock();
+   unsigned clock_hz       = 4000000;
    unsigned sample_rate_hz = clock_hz / 64;
 
    ym2151.start(clock_hz);
-
    dac.start(sample_rate_hz);
 
 #if not defined(HW_NATIVE)
@@ -182,12 +172,6 @@ int main()
 
    usleep(1000000);
 
-   decoder.load(table_vgm);
-   decoder.plugSN76489(&sn76489);
-   decoder.plugYM2151(&ym2151);
-   decoder.plugSegaPCM(&sega_pcm);
-   decoder.plugOKIM6295(&oki_m6295);
-
    startAudio();
 
 #if defined(HW_USB_DEVICE)
@@ -204,11 +188,21 @@ int main()
    phys_midi.attachInstrument(3, sega_pcm);
    phys_midi.attachInstrument(4, ym2151);
 
-   decoder.setTickFn(midiIn);
+   decoder.plugSN76489(&sn76489);
+   decoder.plugSegaPCM(&sega_pcm);
+   decoder.plugOKIM6295(&oki_m6295);
+   decoder.plugYM2151(&ym2151);
+   decoder.load(table_vgm);
 
    while(true)
    {
-      midiIn();
+      phys_midi.tick();
+
+#if defined(HW_USB_DEVICE)
+      usb.tick();
+#endif
+
+      decoder.tick();
 
       led = synth.isAnyVoiceOn();
    }

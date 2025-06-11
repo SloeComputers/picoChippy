@@ -37,11 +37,11 @@ public:
    Emulator() = default;
 
    //! Set sample rate (Hz)
-   void setClock(unsigned clock_) override
+   bool setClock(unsigned clock_) override
    {
-      ticks_per_sample = 128 / CLOCK_DIV;
+      ticks_per_sample = clock_ticks_per_sample / CLOCK_DIV;
 
-      SN76489::Interface::setClock(clock_);
+      return Chip::setClock(clock_);
    }
 
    //! Configure shift register size and taps

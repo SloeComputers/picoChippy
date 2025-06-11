@@ -37,19 +37,29 @@ class Chip : public MIDI::Instrument
 {
 public:
    Chip(const char* name_,
-        unsigned num_voices_)
+        unsigned num_voices_,
+        unsigned clock_ticks_per_sample_)
       : MIDI::Instrument(num_voices_, /* base_channel */ 0)
+      , clock_ticks_per_sample(clock_ticks_per_sample_)
       , name(name_)
    {
       controlUpdate();
    }
 
-   void setMute(bool mute_)
+   //! Set clock frequency (Hz)
+   virtual bool setClock(unsigned clock_freq_hz_)
    {
-      mute = mute_;
+      clock_freq_hz = clock_freq_hz_;
+      mute          = clock_freq_hz_ == 0;
+
+      return mute;
    }
 
    const char* getName() const { return name; }
+
+   unsigned getSampleFreq() const { return clock_freq_hz / clock_ticks_per_sample; }
+
+   bool isMute() const { return mute; }
 
 protected:
    //! Common audio processing for mono synth chips
@@ -88,6 +98,8 @@ protected:
    }
 
    volatile bool mute{true};
+   unsigned      clock_freq_hz{};
+   unsigned      clock_ticks_per_sample{1};
 
 private:
    void controlUpdate()

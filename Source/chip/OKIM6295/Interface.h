@@ -37,7 +37,7 @@ class Interface : public Chip
 {
 public:
    Interface()
-      : Chip("OKIM6295", NUM_CHANNELS)
+      : Chip("OKIM6295", NUM_CHANNELS, /* clock_ticks_per_sample */ 128)
    {
    }
 

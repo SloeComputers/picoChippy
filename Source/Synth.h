@@ -41,7 +41,10 @@ public:
 private:
    void voiceOn(unsigned index_, uint8_t midi_note_, uint8_t velocity_) override
    {
-      io.triggerVGM();
+      if (midi_note_ == 60)
+         io.playVGM(true);
+      else if (midi_note_ == 61)
+         io.playVGM(false);
    }
 
    SynthIO& io;

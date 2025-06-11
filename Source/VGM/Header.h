@@ -33,6 +33,31 @@ struct Header
 
    unsigned size() const { return eof_offset + 4; }
 
+   unsigned getSN76489Clock() const
+   {
+      return version >= 0x100 ? sn76489_clock : 0;
+   }
+
+   unsigned getYM2151Clock() const
+   {
+      return version >= 0x151 ? ym2151_clock : 0;
+   }
+
+   unsigned getYM3812Clock() const
+   {
+      return version >= 0x151 ? ym3812_clock : 0;
+   }
+
+   unsigned getSegaPCMClock() const
+   {
+      return version >= 0x151 ? sega_pcm_clock : 0;
+   }
+
+   unsigned getOKIM6295Clock() const
+   {
+      return version >= 0x161 ? oki_m6295_clock : 0;
+   }
+
    void dis() const
    {
       printf("\n");
@@ -47,27 +72,33 @@ struct Header
       printf("Rate         : %u\n",       rate);
       printf("\n");
 
-      if (sn76489_clock)
+      if (getSN76489Clock())
       {
          printf("SN76489 clk  : %u Hz\n",   sn76489_clock);
-         printf("SN76489 SR sz: %u bits\n", sn76489_shift_reg_width);
-         printf("SN76489 fb   : 0x%04X\n",  sn76489_feedback);
-         printf("SN76489 flag : 0x%02X\n",  sn76489_flags);
+
+         if (version >= 0x110)
+         {
+            printf("SN76489 SR sz: %u bits\n", sn76489_shift_reg_width);
+            printf("SN76489 fb   : 0x%04X\n",  sn76489_feedback);
+
+            if (version >= 0x151)
+               printf("SN76489 flag : 0x%02X\n",  sn76489_flags);
+         }
       }
 
-      if (ym2151_clock)
+      if (getYM2151Clock())
          printf("YM2151 clk   : %u Hz\n", ym2151_clock);
 
-      if (sega_pcm_clock)
+      if (getSegaPCMClock())
       {
          printf("SegaPCM clk  : %u Hz\n", sega_pcm_clock);
          printf("SegaPCM ifc  : 0x%08X\n", sega_pcm_interface);
       }
 
-      if (ym3812_clock)
+      if (getYM3812Clock())
          printf("YM3812 clk   : %u Hz\n", ym3812_clock);
 
-      if (oki_m6295_clock)
+      if (getOKIM6295Clock())
          printf("OKIM6295 clk : %u Hz\n", oki_m6295_clock);
 
       printf("\n");

@@ -43,14 +43,22 @@ public:
    Hardware(unsigned pin_clk_)
       : pin_clk(pin_clk_)
    {
+      sd = clock.download(pio, clock_freq_);
    }
 
-   void setClock(unsigned clock_freq_) override
+   bool setClock(unsigned clock_freq_) override
    {
-      int sd = clock.download(pio, clock_freq_);
-      pio.start(1 << sd);
+      if (clock_freq_)
+      {
+         pio.start(1 << sd);
+         reset();
+      }
+      else
+      {
+         pio.stop(1 << sd);
+      }
 
-      reset();
+      return Chip::setClock(clock_freq_);
    }
 
    void reset() override
@@ -105,8 +113,9 @@ private:
    MTL::Gpio::Out<1, PIN_CTRL3+1> _wr;   //!< Write enable
    MTL::Gpio::In<1,  PIN_CTRL3+2> ready; //!< Ready
 
-   MTL::PioClock clock{};  //! Clock out to SN76489
-   PIO_SYNTH     pio{};    //! PIO instance
+   MTL::PioClock clock{};  //!< Clock out to SN76489
+   PIO_SYNTH     pio{};    //!< PIO instance
+   int           sd;       //!< clock descriptor
 };
 
 } // namespace SN76489

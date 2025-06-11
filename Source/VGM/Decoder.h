@@ -49,174 +49,159 @@ public:
 
    Decoder() = default;
 
-   unsigned getClock() const
-   {
-      if (hdr->sn76489_clock != 0)
-         return hdr->sn76489_clock;
-
-      if (hdr->ym2151_clock != 0)
-         return hdr->ym2151_clock;
-
-      if (hdr->sega_pcm_clock != 0)
-         return hdr->sega_pcm_clock;
-
-      return 4000000;
-   }
+   void plugSN76489(SN76489::Interface* interface_)   { sn76489 = interface_; }
+   void plugSegaPCM(SegaPCM::Interface* interface_)   { sega_pcm = interface_; }
+   void plugOKIM6295(OKIM6295::Interface* interface_) { oki_m6295 = interface_; }
+   void plugYM2151(YM2151::Interface* interface_)     { ym2151 = interface_; }
 
    //! Load VGM image
    void load(const uint8_t* image_)
    {
+      stop();
+
       raw = image_;
       hdr = (const Header*)raw;
 
       hdr->dis();
-   }
 
-   void plugSN76489(SN76489::Interface* interface_)
-   {
-      sn76489 = hdr->sn76489_clock != 0 ? interface_
-                                        : nullptr;
-
-      if (sn76489)
-      {
-         sn76489->setClock(hdr->sn76489_clock);
-
-         sn76489->config(hdr->sn76489_shift_reg_width,
-                         hdr->sn76489_feedback,
-                         hdr->sn76489_flags);
-      }
-   }
-
-   void plugYM2151(YM2151::Interface* interface_)
-   {
-      ym2151 = hdr->ym2151_clock != 0 ? interface_
-                                      : nullptr;
-   }
-
-   void plugSegaPCM(SegaPCM::Interface* interface_)
-   {
-      sega_pcm = hdr->sega_pcm_clock != 0 ? interface_
-                                          : nullptr;
-   }
-
-   void plugOKIM6295(OKIM6295::Interface* interface_)
-   {
-      oki_m6295 = hdr->oki_m6295_clock != 0 ? interface_
-                                            : nullptr;
+      configSynths();
    }
 
    void play()
    {
       reset();
 
-      while(true)
-      {
-         uint16_t addr16;
-         uint8_t  addr;
-         uint8_t  data;
-
-         uint8_t byte = read8();
-
-         switch(byte)
-         {
-         case 0x50:
-            data = read8();
-            if (sn76489) sn76489->writeReg(data);
-            break;
-
-         case 0x54:
-            addr = read8();
-            data = read8();
-            if (ym2151) ym2151->writeReg(addr, data);
-            break;
-
-         case 0x5A:
-             addr = read8();
-             data = read8();
-             // if (ym3812) ym2812->writeReg(addr, data);
-             break;
-
-         case 0x61: wait(read16()); break;
-         case 0x62: wait(735); break;
-         case 0x63: wait(882); break;
-
-         case 0x66: DBG("END\n"); return;
-
-         case 0x67:
-            {
-               // assert(raw[offset] = 0x66);
-   
-               skip(1);
-               uint8_t  type = read8();
-               uint32_t size = read32();
-
-               DBG("DB type=0x%02x size=0x%x\n", type, size);
- 
-               if ((type >= 0x80) && (type < 0xC0))
-               {
-                  uint32_t rom_size = read32();
-                  uint32_t address  = read32();
-
-                  size -= 8;
-
-                  switch(type)
-                  {
-                  case 0x80:
-                     DBG("SEGA ROM %04x/%04x +%04X %p\n", address, rom_size, size, ptr8());
-                     sega_pcm->addSample(address, ptr8(), size);
-                     break;
-
-                  case 0x8B:
-                     DBG("OKI M6295 ROM %04x/%04x +%04X %p\n", address, rom_size, size, ptr8());
-                     oki_m6295->addRomImage(address, ptr8(), size);
-                     break;
-
-                  default:
-                     DBG("???? ROM %04x/%04x +%04X\n", address, rom_size, size);
-                     break;
-                  }
-               }
-
-               skip(size);
-            }
-            break;
-
-         case 0x70: case 0x71: case 0x72: case 0x73: case 0x74: case 0x75: case 0x76: case 0x77:
-         case 0x78: case 0x79: case 0x7A: case 0x7B: case 0x7C: case 0x7D: case 0x7E: case 0x7F:
-            wait((byte & 0xF) + 1);
-            break;
-
-         case 0xB8:
-            addr = read8();
-            data = read8();
-            if (oki_m6295) oki_m6295->writeReg(data); break;
-            break;
-
-         case 0xC0:
-            addr16 = read16();
-            data   = read8();
-            if (sega_pcm) sega_pcm->writeReg(addr16, data);
-            break;
-
-         default:
-            DBG("ERROR %02X\n", byte);
-            return;
-         }
-      }
+      playing = true;
    }
 
    void tick()
    {
+      if (not playing) return;
+
+      uint16_t addr16;
+      uint8_t  addr;
+      uint8_t  data;
+
+      uint8_t byte = read8();
+
+      switch(byte)
+      {
+      case 0x50:
+         data = read8();
+         if (sn76489) sn76489->writeReg(data);
+         break;
+
+      case 0x54:
+         addr = read8();
+         data = read8();
+         if (ym2151) ym2151->writeReg(addr, data);
+         break;
+
+      case 0x5A:
+         addr = read8();
+         data = read8();
+         // if (ym3812) ym2812->writeReg(addr, data);
+         break;
+
+      case 0x61: wait(read16()); break;
+      case 0x62: wait(735); break;
+      case 0x63: wait(882); break;
+
+      case 0x66: DBG("END\n"); playing = false; break;
+
+      case 0x67:
+         {
+            // assert(raw[offset] = 0x66);
+   
+            skip(1);
+            uint8_t  type = read8();
+            uint32_t size = read32();
+
+            DBG("DB type=0x%02x size=0x%x\n", type, size);
+ 
+            if ((type >= 0x80) && (type < 0xC0))
+            {
+               uint32_t rom_size = read32();
+               uint32_t address  = read32();
+
+               size -= 8;
+
+               switch(type)
+               {
+               case 0x80:
+                  DBG("SEGA ROM %04x/%04x +%04X %p\n", address, rom_size, size, ptr8());
+                  sega_pcm->addSample(address, ptr8(), size);
+                  break;
+
+               case 0x8B:
+                  DBG("OKI M6295 ROM %04x/%04x +%04X %p\n", address, rom_size, size, ptr8());
+                  oki_m6295->addRomImage(address, ptr8(), size);
+                  break;
+
+               default:
+                  DBG("???? ROM %04x/%04x +%04X\n", address, rom_size, size);
+                  break;
+               }
+            }
+
+            skip(size);
+         }
+         break;
+
+      case 0x70: case 0x71: case 0x72: case 0x73: case 0x74: case 0x75: case 0x76: case 0x77:
+      case 0x78: case 0x79: case 0x7A: case 0x7B: case 0x7C: case 0x7D: case 0x7E: case 0x7F:
+         wait((byte & 0xF) + 1);
+         break;
+
+      case 0xB8:
+         addr = read8();
+         data = read8();
+         if (oki_m6295) oki_m6295->writeReg(data); break;
+         break;
+
+      case 0xC0:
+         addr16 = read16();
+         data   = read8();
+         if (sega_pcm) sega_pcm->writeReg(addr16, data);
+         break;
+
+      default:
+         DBG("ERROR %02X\n", byte);
+         break;
+      }
+   }
+
+   void stop()
+   {
+      playing =  false;
+   }
+
+   void sample()
+   {
       samples++;
    }
 
-   void setTickFn(TickFn fn_, void* ptr_ = nullptr)
+private:
+   //! Configure synths for current VGM
+   void configSynths()
    {
-      tick_fn  = fn_;
-      tick_ptr = ptr_;
+      if (sn76489->setClock(hdr->getSN76489Clock()))
+      {
+         if (hdr->version >= 110)
+         {
+            sn76489->config(hdr->sn76489_shift_reg_width,
+                            hdr->sn76489_feedback,
+                            hdr->sn76489_flags);
+         }
+      }
+
+      sega_pcm->setClock(hdr->getSegaPCMClock());
+
+      oki_m6295->setClock(hdr->getOKIM6295Clock());
+
+      ym2151->setClock(hdr->getYM2151Clock());
    }
 
-private:
    void reset()
    {
       offset = 0x34 + hdr->vgm_data_offset;
@@ -236,14 +221,9 @@ private:
    {
       DBG("Wait %u\n", samples_);
 
-      if (tick_fn != nullptr)
-         (*tick_fn)(tick_ptr);
-
       usleep(samples_ * 23);
    }
 
-   TickFn         tick_fn{nullptr};
-   void*          tick_ptr{};
    const Header*  hdr;
    const uint8_t* raw;
    unsigned       offset{0};
@@ -255,6 +235,7 @@ private:
    std::atomic<unsigned> samples{0};
 #endif
 
+   bool                 playing{false};
    SN76489::Interface*  sn76489{};
    YM2151::Interface*   ym2151{};
    SegaPCM::Interface*  sega_pcm{};

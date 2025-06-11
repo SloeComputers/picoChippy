@@ -88,6 +88,7 @@ private:
       printf("New VGM file %u\n", size_);
 
       decoder.load(vgm_file);
+      decoder.play();
    }
 
    char readme[1024];

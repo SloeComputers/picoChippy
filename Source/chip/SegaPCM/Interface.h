@@ -37,7 +37,7 @@ class Interface : public Chip
 {
 public:
    Interface()
-      : Chip("SegaPCM", NUM_CHANNELS)
+      : Chip("SegaPCM", NUM_CHANNELS, /* clock_ticks_per_sample */ 128)
    {
    }
 
