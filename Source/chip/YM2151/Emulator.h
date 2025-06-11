@@ -20,7 +20,7 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------
 
-// \brief Interface for Yamaha YM2151
+// \brief Emulation of Yamaha YM2151
 
 #pragma once
 
@@ -39,6 +39,8 @@ public:
 
    void mixOut(Sample& mix_)
    {
+      if (mute) return;
+
       int16_t left{0};
       int16_t right{0};
 

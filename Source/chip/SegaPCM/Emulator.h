@@ -41,6 +41,8 @@ public:
    //! Get next PCM sample pair
    void mixOut(Sample& mix_)
    {
+      if (mute) return;
+
       Sample out{};
       for(unsigned i = 0; i < NUM_CHANNELS; ++i)
       {

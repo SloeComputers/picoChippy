@@ -53,6 +53,8 @@ public:
    //! Add sample to the mix
    void mixOut(Sample& mix_)
    {
+      if (mute) return;
+
       int32_t sample{0};
 
       sample += tone[CH_TONE1].out(ticks_per_sample);

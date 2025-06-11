@@ -110,7 +110,6 @@ void SynthIO::triggerVGM()
 
 // -----------------------------------------------------------------------------
 
-
 #if not defined(HW_NATIVE)
 static void runDAC()
 {
@@ -124,6 +123,7 @@ static void runDAC()
       mix_psg_pcm = 0;
       sn76489.mixOut(mix_psg_pcm);
       sega_pcm.mixOut(mix_psg_pcm);
+      oki_m6295.mixOut(mix_psg_pcm);
 
       final_mix = mix_psg_pcm;
       ym2151.mixOut(final_mix);

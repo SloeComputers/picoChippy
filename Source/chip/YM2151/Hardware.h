@@ -73,6 +73,8 @@ public:
 
    void mixOut(Sample& mix_)
    {
+      if (mute) return;
+
       int16_t left, right;
       dac_in.pop(left, right);
 

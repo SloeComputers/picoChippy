@@ -44,6 +44,11 @@ public:
       controlUpdate();
    }
 
+   void setMute(bool mute_)
+   {
+      mute = mute_;
+   }
+
    const char* getName() const { return name; }
 
 protected:
@@ -81,6 +86,8 @@ protected:
          break;
       }
    }
+
+   volatile bool mute{true};
 
 private:
    void controlUpdate()
