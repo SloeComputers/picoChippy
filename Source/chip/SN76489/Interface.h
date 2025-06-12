@@ -43,9 +43,6 @@ public:
    {
    }
 
-   //! Configure shift register size and taps (for emulation)
-   virtual void config(unsigned bits_, uint32_t taps_, uint8_t flags_) {}
-
    //! Initialize all voices
    virtual void reset()
    {
@@ -95,6 +92,12 @@ public:
    {
       DBG("WR %02X\n", data_);
 
+      writeBus(data_);
+   }
+
+   //! Raw register interface
+   void write(uint16_t addr_, uint8_t data_) override
+   {
       writeBus(data_);
    }
 

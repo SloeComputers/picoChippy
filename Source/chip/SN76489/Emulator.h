@@ -45,7 +45,7 @@ public:
    }
 
    //! Configure shift register size and taps
-   void config(unsigned bits_, uint32_t taps_, uint8_t flags_) override
+   void config(unsigned bits_, unsigned taps_, unsigned flags_) override
    {
       noise.config(bits_, taps_);
    }

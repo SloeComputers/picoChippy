@@ -260,6 +260,11 @@ public:
       return shadow[addr_];
    }
 
+   void write(uint16_t addr_, uint8_t data_) override
+   {
+      writeReg(addr_, data_);
+   }
+
 protected:
    //! Write a field in a register
    void writeField(uint8_t  addr_,

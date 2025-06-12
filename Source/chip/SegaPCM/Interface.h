@@ -66,18 +66,16 @@ public:
    }
 
    //! Declare a sample and return an id
-   unsigned addSample(uint32_t hw_addr_, const uint8_t* ptr_, unsigned size_)
+   void addSample(uint32_t hw_addr_, const uint8_t* ptr_, unsigned size_) override
    {
       for(unsigned i = 0; i < MAX_SAMPLES; ++i)
       {
          if (not sample_list[i].isValid())
          {
             sample_list[i].set(hw_addr_, ptr_, size_);
-            return i + 1;
+            break;
          }
       }
-
-      return 0;
    }
 
    //! Remove a sample
@@ -148,6 +146,11 @@ public:
    {
       DBG("WR %02X => %04X\n", data_, addr_);
 
+      writeBus(addr_, data_);
+   }
+
+   void write(uint16_t addr_, uint8_t data_) override
+   {
       writeBus(addr_, data_);
    }
 

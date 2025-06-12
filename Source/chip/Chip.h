@@ -46,6 +46,14 @@ public:
       controlUpdate();
    }
 
+   const char* getName() const { return name; }
+
+   //! Get configured sample frequency (Hz)
+   unsigned getSampleFreq() const { return clock_freq_hz / clock_ticks_per_sample; }
+
+   //! Check synth muted status
+   bool isMute() const { return mute; }
+
    //! Set clock frequency (Hz)
    virtual bool setClock(unsigned clock_freq_hz_)
    {
@@ -55,11 +63,19 @@ public:
       return mute;
    }
 
-   const char* getName() const { return name; }
+   //! Override to implement special configuration
+   virtual void config(unsigned param1_, unsigned param2_ = 0, unsigned param_3_ = 0)
+   {
+   }
 
-   unsigned getSampleFreq() const { return clock_freq_hz / clock_ticks_per_sample; }
+   virtual void addSample(uint32_t addr_, const uint8_t* ptr_, unsigned size_)
+   {
+   }
 
-   bool isMute() const { return mute; }
+   //! Override to implement sound driver
+   virtual void write(uint16_t addr_, uint8_t data_)
+   {
+   }
 
 protected:
    //! Common audio processing for mono synth chips

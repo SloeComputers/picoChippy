@@ -50,8 +50,15 @@ public:
       }
    }
 
+   void writeReg(uint8_t data_)
+   {
+      DBG("WR %02X\n", data_);
+
+      writeBus(data_);
+   }
+
    //! Add a section of ROM
-   void addRomImage(uint32_t hw_addr_, const uint8_t* ptr_, unsigned size_)
+   void addSample(uint32_t hw_addr_, const uint8_t* ptr_, unsigned size_) override
    {
       if (hw_addr_ == 0)
       {
@@ -74,10 +81,8 @@ public:
       }
    }
 
-   void writeReg(uint8_t data_)
+   void write(uint16_t addr_, uint8_t data_) override
    {
-      DBG("WR %02X\n", data_);
-
       writeBus(data_);
    }
 

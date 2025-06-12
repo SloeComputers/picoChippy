@@ -32,10 +32,7 @@
 
 #include "VGM/Header.h"
 
-#include "SN76489/Interface.h"
-#include "YM2151/Interface.h"
-#include "SegaPCM/Interface.h"
-#include "OKIM6295/Interface.h"
+#include "Chip.h"
 
 #undef  DBG
 #define DBG if (0) printf
@@ -49,10 +46,10 @@ public:
 
    Decoder() = default;
 
-   void plugSN76489(SN76489::Interface* interface_)   { sn76489 = interface_; }
-   void plugSegaPCM(SegaPCM::Interface* interface_)   { sega_pcm = interface_; }
-   void plugOKIM6295(OKIM6295::Interface* interface_) { oki_m6295 = interface_; }
-   void plugYM2151(YM2151::Interface* interface_)     { ym2151 = interface_; }
+   void plugSN76489( Chip* interface_) { sn76489   = interface_; }
+   void plugSegaPCM( Chip* interface_) { sega_pcm  = interface_; }
+   void plugOKIM6295(Chip* interface_) { oki_m6295 = interface_; }
+   void plugYM2151(  Chip* interface_) { ym2151    = interface_; }
 
    //! Load VGM image
    void load(const uint8_t* image_)
@@ -88,19 +85,19 @@ public:
       {
       case 0x50:
          data = read8();
-         if (sn76489) sn76489->writeReg(data);
+         if (sn76489) sn76489->write(0, data);
          break;
 
       case 0x54:
          addr = read8();
          data = read8();
-         if (ym2151) ym2151->writeReg(addr, data);
+         if (ym2151) ym2151->write(addr, data);
          break;
 
       case 0x5A:
          addr = read8();
          data = read8();
-         // if (ym3812) ym2812->writeReg(addr, data);
+         // if (ym3812) ym2812->write(addr, data);
          break;
 
       case 0x61: wait(read16()); break;
@@ -135,7 +132,7 @@ public:
 
                case 0x8B:
                   DBG("OKI M6295 ROM %04x/%04x +%04X %p\n", address, rom_size, size, ptr8());
-                  oki_m6295->addRomImage(address, ptr8(), size);
+                  oki_m6295->addSample(address, ptr8(), size);
                   break;
 
                default:
@@ -156,13 +153,13 @@ public:
       case 0xB8:
          addr = read8();
          data = read8();
-         if (oki_m6295) oki_m6295->writeReg(data); break;
+         if (oki_m6295) oki_m6295->write(0, data); break;
          break;
 
       case 0xC0:
          addr16 = read16();
          data   = read8();
-         if (sega_pcm) sega_pcm->writeReg(addr16, data);
+         if (sega_pcm) sega_pcm->write(addr16, data);
          break;
 
       default:
@@ -185,7 +182,7 @@ private:
    //! Configure synths for current VGM
    void configSynths()
    {
-      if (sn76489->setClock(hdr->getSN76489Clock()))
+      if (sn76489 && sn76489->setClock(hdr->getSN76489Clock()))
       {
          if (hdr->version >= 110)
          {
@@ -195,11 +192,11 @@ private:
          }
       }
 
-      sega_pcm->setClock(hdr->getSegaPCMClock());
+      if (sega_pcm) sega_pcm->setClock(hdr->getSegaPCMClock());
 
-      oki_m6295->setClock(hdr->getOKIM6295Clock());
+      if (oki_m6295) oki_m6295->setClock(hdr->getOKIM6295Clock());
 
-      ym2151->setClock(hdr->getYM2151Clock());
+      if (ym2151) ym2151->setClock(hdr->getYM2151Clock());
    }
 
    void reset()
@@ -235,11 +232,12 @@ private:
    std::atomic<unsigned> samples{0};
 #endif
 
-   bool                 playing{false};
-   SN76489::Interface*  sn76489{};
-   YM2151::Interface*   ym2151{};
-   SegaPCM::Interface*  sega_pcm{};
-   OKIM6295::Interface* oki_m6295{};
+   bool playing{false};
+
+   Chip* sn76489{};
+   Chip* ym2151{};
+   Chip* sega_pcm{};
+   Chip* oki_m6295{};
 };
 
 } // namespace VGM
