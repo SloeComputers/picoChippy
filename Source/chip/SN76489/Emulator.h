@@ -184,7 +184,10 @@ protected:
    class Noise : public Tone
    {
    public:
-      Noise() = default;
+      Noise()
+      {
+         config(16, 0x0009);
+      }
 
       //! Configure shift register size and taps
       void config(unsigned bits_, uint32_t taps_)
@@ -260,10 +263,10 @@ protected:
       bool state{};
       bool output{};
 
-      volatile uint32_t noise_mask{0x9000};
+      volatile uint32_t noise_mask{};
       volatile uint32_t shift_reg{};
-      volatile uint32_t tap_mask{0x9000};
-      volatile uint8_t  width{16};
+      volatile uint32_t tap_mask{};
+      volatile uint8_t  width{};
    };
 
    static const unsigned CLOCK_DIV = 16;

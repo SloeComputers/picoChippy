@@ -138,7 +138,7 @@ private:
             read_sample_pair = true;
          }
 
-         int16_t sample = adpcmDecode(input) << 4;
+         int16_t sample = adpcmDecode(input) << 2;
 
          mix_.left  += sample * vol;
          mix_.right += sample * vol;
@@ -152,7 +152,7 @@ private:
          adpcm_prev_out   = 0;
       }
 
-      //! Decode a 5-but ADPCM sample to a 12-bit linear sample
+      //! Decode a 4-bit ADPCM sample to a 12-bit linear sample
       int32_t adpcmDecode(uint8_t in4)
       {
          static const signed step_adjust_table[8] =

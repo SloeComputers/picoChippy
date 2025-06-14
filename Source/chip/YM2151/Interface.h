@@ -260,6 +260,11 @@ public:
       return shadow[addr_];
    }
 
+   void reset() override
+   {
+      softReset();
+   }
+
    void write(uint16_t addr_, uint8_t data_) override
    {
       writeReg(addr_, data_);

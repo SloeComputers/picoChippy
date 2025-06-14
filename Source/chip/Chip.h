@@ -49,10 +49,19 @@ public:
    const char* getName() const { return name; }
 
    //! Get configured sample frequency (Hz)
-   unsigned getSampleFreq() const { return clock_freq_hz / clock_ticks_per_sample; }
+   unsigned getSampleFreq() const
+   {
+      return sample_mul * clock_freq_hz / clock_ticks_per_sample;
+   }
 
    //! Check synth muted status
    bool isMute() const { return mute; }
+
+   //! Set multiplier for sample frequency
+   void setSampleMul(unsigned n_)
+   {
+      sample_mul = n_;
+   }
 
    //! Set clock frequency (Hz)
    virtual bool setClock(unsigned clock_freq_hz_)
@@ -60,22 +69,19 @@ public:
       clock_freq_hz = clock_freq_hz_;
       mute          = clock_freq_hz_ == 0;
 
-      return mute;
+      return not mute;
    }
+
+   //! Override to implement special reset behaviour
+   virtual void reset() {}
 
    //! Override to implement special configuration
-   virtual void config(unsigned param1_, unsigned param2_ = 0, unsigned param_3_ = 0)
-   {
-   }
+   virtual void config(unsigned param1_, unsigned param2_ = 0, unsigned param_3_ = 0) {}
 
-   virtual void addSample(uint32_t addr_, const uint8_t* ptr_, unsigned size_)
-   {
-   }
+   virtual unsigned addSample(uint32_t addr_, const uint8_t* ptr_, unsigned size_) { return 0; }
 
    //! Override to implement sound driver
-   virtual void write(uint16_t addr_, uint8_t data_)
-   {
-   }
+   virtual void write(uint16_t addr_, uint8_t data_) = 0;
 
 protected:
    //! Common audio processing for mono synth chips
@@ -129,4 +135,5 @@ private:
    uint8_t         volume{127};
    uint8_t         balance{64};
    volatile Sample level{};
+   unsigned        sample_mul{1};
 };

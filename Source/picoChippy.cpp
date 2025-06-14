@@ -33,6 +33,7 @@
 
 #include "Table_vgm.h"
 
+#include "Dac.h"
 #include "SN76489/Emulator.h"
 #include "SegaPCM/Emulator.h"
 #include "OKIM6295/Emulator.h"
@@ -60,7 +61,7 @@ static hw::YM2151 ym2151;
 
 // --- Audio out DAC -----------------------------------------------------------
 
-static hw::Dac    dac{};
+static chip::DacImpl<hw::Dac> dac{62500};
 
 
 // --- Physical MIDI -----------------------------------------------------------
@@ -119,6 +120,11 @@ static void runDAC()
    Sample mix_psg_pcm;
    Sample final_mix;
 
+   // These synths are sampled at half the rate of the YM2151
+   sn76489.setSampleMul(2);
+   sega_pcm.setSampleMul(2);
+   oki_m6295.setSampleMul(2);
+
    while(true)
    {
       decoder.sample();
@@ -130,11 +136,11 @@ static void runDAC()
 
       final_mix = mix_psg_pcm;
       ym2151.mixOut(final_mix);
-      dac.push(final_mix.left, final_mix.right);
+      dac.push(final_mix);
 
       final_mix = mix_psg_pcm;
       ym2151.mixOut(final_mix);
-      dac.push(final_mix.left, final_mix.right);
+      dac.push(final_mix);
    }
 }
 #endif
@@ -148,7 +154,7 @@ void startAudio()
    unsigned sample_rate_hz = clock_hz / 64;
 
    ym2151.start(clock_hz);
-   dac.start(sample_rate_hz);
+   dac.setSampleRate(sample_rate_hz);
 
 #if not defined(HW_NATIVE)
    MTL_start_core(1, runDAC);
@@ -188,6 +194,7 @@ int main()
    phys_midi.attachInstrument(3, sega_pcm);
    phys_midi.attachInstrument(4, ym2151);
 
+   decoder.plugDAC(&dac);
    decoder.plugSN76489(&sn76489);
    decoder.plugSegaPCM(&sega_pcm);
    decoder.plugOKIM6295(&oki_m6295);

@@ -41,15 +41,6 @@ public:
    {
    }
 
-   //! Initialize samples
-   void reset()
-   {
-      for(unsigned id = 1; id <= MAX_SAMPLES; ++id)
-      {
-         sample_table[id - 1].clear();
-      }
-   }
-
    void writeReg(uint8_t data_)
    {
       DBG("WR %02X\n", data_);
@@ -57,8 +48,17 @@ public:
       writeBus(data_);
    }
 
+   //! Initialize samples
+   void reset() override
+   {
+      for(unsigned id = 1; id <= MAX_SAMPLES; ++id)
+      {
+         sample_table[id - 1].clear();
+      }
+   }
+
    //! Add a section of ROM
-   void addSample(uint32_t hw_addr_, const uint8_t* ptr_, unsigned size_) override
+   unsigned addSample(uint32_t hw_addr_, const uint8_t* ptr_, unsigned size_) override
    {
       if (hw_addr_ == 0)
       {
@@ -79,6 +79,8 @@ public:
       {
          sample_table[id - 1].link(hw_addr_, hw_addr_ + size_, ptr_);
       }
+
+      return 0;
    }
 
    void write(uint16_t addr_, uint8_t data_) override

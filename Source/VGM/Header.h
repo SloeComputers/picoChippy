@@ -33,30 +33,14 @@ struct Header
 
    unsigned size() const { return eof_offset + 4; }
 
-   unsigned getSN76489Clock() const
-   {
-      return version >= 0x100 ? sn76489_clock : 0;
-   }
+   unsigned getSN76489Clock() const { return version >= 0x100 ? sn76489_clock : 0; }
+   unsigned getYM2413Clock() const  { return version >= 0x100 ? ym2413_clock : 0; }
+   unsigned getYM2612Clock() const  { return version >= 0x100 ? ym2612_clock : 0; }
+   unsigned getYM2151Clock() const  { return version >= 0x151 ? ym2151_clock : 0; }
+   unsigned getYM3812Clock() const  { return version >= 0x151 ? ym3812_clock : 0; }
 
-   unsigned getYM2151Clock() const
-   {
-      return version >= 0x151 ? ym2151_clock : 0;
-   }
-
-   unsigned getYM3812Clock() const
-   {
-      return version >= 0x151 ? ym3812_clock : 0;
-   }
-
-   unsigned getSegaPCMClock() const
-   {
-      return version >= 0x151 ? sega_pcm_clock : 0;
-   }
-
-   unsigned getOKIM6295Clock() const
-   {
-      return version >= 0x161 ? oki_m6295_clock : 0;
-   }
+   unsigned getSegaPCMClock() const  { return version >= 0x151 ? sega_pcm_clock : 0; }
+   unsigned getOKIM6295Clock() const { return version >= 0x161 ? oki_m6295_clock : 0; }
 
    void dis() const
    {
@@ -86,17 +70,23 @@ struct Header
          }
       }
 
+      if (getYM2413Clock())
+         printf("YM2413 clk   : %u Hz\n", ym2413_clock);
+
+      if (getYM2612Clock())
+         printf("YM2612 clk   : %u Hz\n", ym2612_clock);
+
       if (getYM2151Clock())
          printf("YM2151 clk   : %u Hz\n", ym2151_clock);
+
+      if (getYM3812Clock())
+         printf("YM3812 clk   : %u Hz\n", ym3812_clock);
 
       if (getSegaPCMClock())
       {
          printf("SegaPCM clk  : %u Hz\n", sega_pcm_clock);
          printf("SegaPCM ifc  : 0x%08X\n", sega_pcm_interface);
       }
-
-      if (getYM3812Clock())
-         printf("YM3812 clk   : %u Hz\n", ym3812_clock);
 
       if (getOKIM6295Clock())
          printf("OKIM6295 clk : %u Hz\n", oki_m6295_clock);

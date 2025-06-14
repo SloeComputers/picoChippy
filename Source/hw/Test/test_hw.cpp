@@ -144,7 +144,7 @@ static void runDAC()
 
 static NOINLINE void testDAC(Phase phase_)
 {
-   static hw::Dac dac{};
+   static hw::Dac dac{SAMPLE_RATE};
 
    switch(phase_)
    {
@@ -160,7 +160,6 @@ static NOINLINE void testDAC(Phase phase_)
       break;
 
    case START:
-      dac.start(SAMPLE_RATE);
       MTL_start_core(1, runDAC);
       break;
 

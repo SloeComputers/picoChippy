@@ -41,22 +41,6 @@ public:
    {
    }
 
-   //! Initialize all channels and samples
-   void reset()
-   {
-      for(unsigned channel = 0; channel < NUM_CHANNELS; ++channel)
-      {
-         setFreq(channel, 0);
-         setVol(channel, 0, 0);
-         noteOff(channel);
-      }
-
-      for(unsigned id = 1; id <= MAX_SAMPLES; ++id)
-      {
-         clrSample(id);
-      }
-   }
-
    bool isSampleIdValid(unsigned id_) const
    {
       if ((id_ == 0) || (id_ > MAX_SAMPLES))
@@ -66,16 +50,18 @@ public:
    }
 
    //! Declare a sample and return an id
-   void addSample(uint32_t hw_addr_, const uint8_t* ptr_, unsigned size_) override
+   unsigned addSample(uint32_t hw_addr_, const uint8_t* ptr_, unsigned size_) override
    {
       for(unsigned i = 0; i < MAX_SAMPLES; ++i)
       {
          if (not sample_list[i].isValid())
          {
             sample_list[i].set(hw_addr_, ptr_, size_);
-            break;
+            return i + 1;
          }
       }
+
+      return 0;
    }
 
    //! Remove a sample
@@ -147,6 +133,22 @@ public:
       DBG("WR %02X => %04X\n", data_, addr_);
 
       writeBus(addr_, data_);
+   }
+
+   //! Initialize all channels and samples
+   void reset() override
+   {
+      for(unsigned channel = 0; channel < NUM_CHANNELS; ++channel)
+      {
+         setFreq(channel, 0);
+         setVol(channel, 0, 0);
+         noteOff(channel);
+      }
+
+      for(unsigned id = 1; id <= MAX_SAMPLES; ++id)
+      {
+         clrSample(id);
+      }
    }
 
    void write(uint16_t addr_, uint8_t data_) override

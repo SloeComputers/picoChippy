@@ -33,6 +33,7 @@
 #include "VGM/Header.h"
 
 #include "Chip.h"
+#include "Dac.h"
 
 #undef  DBG
 #define DBG if (0) printf
@@ -46,37 +47,70 @@ public:
 
    Decoder() = default;
 
+   void plugDAC(     chip::Dac* dac_)  { dac       = dac_; }
+
    void plugSN76489( Chip* interface_) { sn76489   = interface_; }
+
+   void plugYM2413(  Chip* interface_) { ym2413    = interface_; }
+   void plugYM2612(  Chip* interface_) { ym2612    = interface_; }
+   void plugYM2151(  Chip* interface_) { ym2151    = interface_; }
+   void plugYM2608(  Chip* interface_) { ym2608    = interface_; }
+   void plugYM2610(  Chip* interface_) { ym2610    = interface_; }
+   void plugYM3812(  Chip* interface_) { ym3812    = interface_; }
+   void plugYM3526(  Chip* interface_) { ym3526    = interface_; }
+   void plugY8950(   Chip* interface_) { y8950     = interface_; }
+   void plugYMZ280B( Chip* interface_) { ymz280b   = interface_; }
+   void plugYMF262(  Chip* interface_) { ymf262    = interface_; }
+
    void plugSegaPCM( Chip* interface_) { sega_pcm  = interface_; }
    void plugOKIM6295(Chip* interface_) { oki_m6295 = interface_; }
-   void plugYM2151(  Chip* interface_) { ym2151    = interface_; }
 
    //! Load VGM image
    void load(const uint8_t* image_)
    {
-      stop();
+      mode = SKIP;
 
       raw = image_;
-      hdr = (const Header*)raw;
-
-      hdr->dis();
-
-      configSynths();
    }
 
    void play()
    {
-      reset();
+      mode = PLAY;
+   }
 
-      playing = true;
+   void stop()
+   {
+      mode = STOP;
    }
 
    void tick()
    {
-      if (not playing) return;
+      switch(mode)
+      {
+      case STOPPED:
+         return;
 
-      uint16_t addr16;
-      uint8_t  addr;
+      case PLAY:
+         configSynths();
+         reset();
+         mode = PLAYING;
+         break;
+
+      case PLAYING:
+         break;
+
+      case STOP:
+         reset();
+         mode = STOPPED;
+         return;
+
+      case SKIP:
+         reset();
+         mode = PLAY;
+         return;
+      }
+
+      uint16_t addr;
       uint8_t  data;
 
       uint8_t byte = read8();
@@ -88,23 +122,101 @@ public:
          if (sn76489) sn76489->write(0, data);
          break;
 
+      case 0x51:
+         addr = read8();
+         data = read8();
+         if (ym2413) ym2413->write(addr, data);
+         break;
+
+      case 0x52:
+         addr = read8();
+         data = read8();
+         if (ym2612) ym2612->write(addr, data);
+         break;
+
+      case 0x53:
+         addr = read8();
+         data = read8();
+         if (ym2612) ym2612->write(0x100 + addr, data);
+         break;
+
       case 0x54:
          addr = read8();
          data = read8();
          if (ym2151) ym2151->write(addr, data);
          break;
 
+      case 0x55:
+         addr = read8();
+         data = read8();
+         if (ym2203) ym2203->write(addr, data);
+         break;
+
+      case 0x56:
+         addr = read8();
+         data = read8();
+         if (ym2608) ym2608->write(addr, data);
+         break;
+
+      case 0x57:
+         addr = read8();
+         data = read8();
+         if (ym2608) ym2608->write(0x100 + addr, data);
+         break;
+
+      case 0x58:
+         addr = read8();
+         data = read8();
+         if (ym2610) ym2610->write(addr, data);
+         break;
+
+      case 0x59:
+         addr = read8();
+         data = read8();
+         if (ym2610) ym2610->write(0x100 + addr, data);
+         break;
+
       case 0x5A:
          addr = read8();
          data = read8();
-         // if (ym3812) ym2812->write(addr, data);
+         if (ym3812) ym3812->write(addr, data);
+         break;
+
+      case 0x5B:
+         addr = read8();
+         data = read8();
+         if (ym3526) ym3526->write(addr, data);
+         break;
+
+      case 0x5C:
+         addr = read8();
+         data = read8();
+         if (y8950) y8950->write(addr, data);
+         break;
+
+      case 0x5D:
+         addr = read8();
+         data = read8();
+         if (ymz280b) ymz280b->write(addr, data);
+         break;
+
+      case 0x5E:
+         addr = read8();
+         data = read8();
+         if (ymf262) ymf262->write(addr, data);
+         break;
+
+      case 0x5F:
+         addr = read8();
+         data = read8();
+         if (ymf262) ymf262->write(0x100 + addr, data);
          break;
 
       case 0x61: wait(read16()); break;
       case 0x62: wait(735); break;
       case 0x63: wait(882); break;
 
-      case 0x66: DBG("END\n"); playing = false; break;
+      case 0x66: DBG("END\n"); stop(); break;
 
       case 0x67:
          {
@@ -157,20 +269,16 @@ public:
          break;
 
       case 0xC0:
-         addr16 = read16();
-         data   = read8();
-         if (sega_pcm) sega_pcm->write(addr16, data);
+         addr = read16();
+         data = read8();
+         if (sega_pcm) sega_pcm->write(addr, data);
          break;
 
       default:
-         DBG("ERROR %02X\n", byte);
+         printf("ERROR %02X\n", byte);
+         stop();
          break;
       }
-   }
-
-   void stop()
-   {
-      playing =  false;
    }
 
    void sample()
@@ -182,26 +290,63 @@ private:
    //! Configure synths for current VGM
    void configSynths()
    {
+      hdr = (const Header*)raw;
+      hdr->dis();
+
+      unsigned sample_freq_hz = 0;
+
       if (sn76489 && sn76489->setClock(hdr->getSN76489Clock()))
       {
          if (hdr->version >= 110)
          {
-            sn76489->config(hdr->sn76489_shift_reg_width,
-                            hdr->sn76489_feedback,
-                            hdr->sn76489_flags);
+           sn76489->config(hdr->sn76489_shift_reg_width,
+                           hdr->sn76489_feedback,
+                           hdr->sn76489_flags);
          }
+
+         sample_freq_hz = sn76489->getSampleFreq();
       }
 
-      if (sega_pcm) sega_pcm->setClock(hdr->getSegaPCMClock());
+      if (sega_pcm && sega_pcm->setClock(hdr->getSegaPCMClock()))
+      {
+         sample_freq_hz = sega_pcm->getSampleFreq();
+      }
 
-      if (oki_m6295) oki_m6295->setClock(hdr->getOKIM6295Clock());
+      if (oki_m6295 && oki_m6295->setClock(hdr->getOKIM6295Clock()))
+      {
+         sample_freq_hz = oki_m6295->getSampleFreq();
+      }
 
-      if (ym2151) ym2151->setClock(hdr->getYM2151Clock());
+      if (ym2151 && ym2151->setClock(hdr->getYM2151Clock()))
+      {
+         sample_freq_hz = ym2151->getSampleFreq();
+      }
+
+      printf("sample freq = %u Hz\n", sample_freq_hz);
+
+      dac->setSampleRate(sample_freq_hz);
    }
 
    void reset()
    {
       offset = 0x34 + hdr->vgm_data_offset;
+
+      if (sn76489)   sn76489->reset();
+
+      if (ym2413)    ym2413->reset();
+      if (ym2612)    ym2612->reset();
+      if (ym2151)    ym2151->reset();
+      if (ym2203)    ym2203->reset();
+      if (ym2608)    ym2608->reset();
+      if (ym2610)    ym2610->reset();
+      if (ym3812)    ym3812->reset();
+      if (ym3526)    ym3526->reset();
+      if (y8950)     y8950->reset();
+      if (ymz280b)   ymz280b->reset();
+      if (ymf262)    ymf262->reset();
+
+      if (sega_pcm)  sega_pcm->reset();
+      if (oki_m6295) oki_m6295->reset();
    }
 
    const uint8_t* ptr8() { return &raw[offset]; }
@@ -232,10 +377,25 @@ private:
    std::atomic<unsigned> samples{0};
 #endif
 
-   bool playing{false};
+   enum Mode { STOPPED, PLAY, PLAYING, SKIP, STOP };
+
+   Mode mode{STOPPED};
+
+   chip::Dac* dac{};
 
    Chip* sn76489{};
+   Chip* ym2413{};
+   Chip* ym2612{};
    Chip* ym2151{};
+   Chip* ym2203{};
+   Chip* ym2608{};
+   Chip* ym2610{};
+   Chip* ym3812{};
+   Chip* ym3526{};
+   Chip* y8950{};
+   Chip* ymz280b{};
+   Chip* ymf262{};
+
    Chip* sega_pcm{};
    Chip* oki_m6295{};
 };

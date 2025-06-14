@@ -43,19 +43,6 @@ public:
    {
    }
 
-   //! Initialize all voices
-   virtual void reset()
-   {
-      for(unsigned voice = 0; voice < 3; ++voice)
-      {
-         setAtten(voice, ATTEN_INF);
-         setPeriod( voice, 0x040);
-      }
-
-      setAtten(3, ATTEN_INF);
-      selectNoise(NOISE_MID);
-   }
-
    //! Set voice (0-2) square wave half period
    void setPeriod(unsigned voice_, unsigned period10_)
    {
@@ -93,6 +80,19 @@ public:
       DBG("WR %02X\n", data_);
 
       writeBus(data_);
+   }
+
+   //! Initialize all voices
+   void reset() override
+   {
+      for(unsigned voice = 0; voice < 3; ++voice)
+      {
+         setAtten(voice, ATTEN_INF);
+         setPeriod( voice, 0x040);
+      }
+
+      setAtten(3, ATTEN_INF);
+      selectNoise(NOISE_MID);
    }
 
    //! Raw register interface

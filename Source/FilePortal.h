@@ -76,10 +76,16 @@ private:
    //! Detector for VGM files, called with a pointer to the first 64 bytes in the file
    bool isNewFileInteresting(const uint8_t* buffer_) override
    {
-      return (buffer_[0] == 'V') &&
-             (buffer_[1] == 'g') &&
-             (buffer_[2] == 'm') &&
-             (buffer_[3] == ' ');
+      bool is_vgm = (buffer_[0] == 'V') &&
+                    (buffer_[1] == 'g') &&
+                    (buffer_[2] == 'm') &&
+                    (buffer_[3] == ' ');
+
+      // Pre-emptive stop to help avoid errors
+      if (is_vgm)
+         decoder.stop();
+
+      return is_vgm;
    }
 
    //! Called when a VGM file download is complete
@@ -88,7 +94,6 @@ private:
       printf("New VGM file %u\n", size_);
 
       decoder.load(vgm_file);
-      decoder.play();
    }
 
    char readme[1024];
