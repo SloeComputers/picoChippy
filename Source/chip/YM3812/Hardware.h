@@ -20,17 +20,17 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------
 
-// \brief Hardware Interface for Yamaha YM2151
+// \brief Hardware Interface for Yamaha YM3812
 
 #pragma once
 
-#include "YM2151/Interface.h"
+#include "YM3812/Interface.h"
 
 #include "MTL/Gpio.h"
 #include "MTL/chip/PioClock.h"
 #include "MTL/chip/PioYMDAC.h"
 
-namespace YM2151 {
+namespace YM3812 {
 
 template <typename PIO_SYNTH,
           typename PIO_DAC,
@@ -42,28 +42,20 @@ class Hardware : public Interface
 public:
    Hardware() = default;
 
-   void init(unsigned clock_freq_hz_,
+   void init(unsigned clock_freq_,
              unsigned pin_clk_m_,
              unsigned pin_clk_sd_sam1_)
    {
-      int sd = clock.download(clock_freq_hz_, pin_clk_m_);
-      clock.start();
+      int sd = clock.download(pio, clock_freq_, pin_clk_m_);
+      pio.start(1 << sd);
 
       hardReset();
 
-      dac_in.download(clock_freq_hz_, pin_clk_sd_sam1_);
+      dac_in.download(clock_freq_, pin_clk_sd_sam1_);
       dac_in.start();
    }
 
-   bool setClock(unsigned clock_freq_hz_) override
-   {
-      clock.setClock(clock_freq_hz_);
-      dac_in.setClock(clock_freq_hz_);
-
-      return Chip::setClock(clock_freq_hz_);
-   }
-
-   //! Initialize bus signals and YM2151 registers uses IC pin
+   //! Initialize bus signals and YM3812 registers uses IC pin
    void hardReset() override
    {
       data8.setHiZ();
@@ -81,19 +73,12 @@ public:
 
    void mixOut(Sample& mix_)
    {
-      if (mute) return;
-
       int16_t left, right;
       dac_in.pop(left, right);
 
       Sample out{left, right};
       mixer(out, mix_);
    }
-
-   static constexpr unsigned _IC = PIN_CTRL4 + 0;
-   static constexpr unsigned A0  = PIN_CTRL4 + 1;
-   static constexpr unsigned _WR = PIN_CTRL4 + 2;
-   static constexpr unsigned _RD = PIN_CTRL4 + 3;
 
 private:
    static uint8_t revBits(uint8_t value_)
@@ -112,7 +97,7 @@ private:
       usleep((nano_seconds_ / 1000) + 1);
    }
 
-   //! Write a byte to the YM2151 bus
+   //! Write a byte to the YM3812 bus
    void writeBus(bool a0_, uint8_t value_) override
    {
       data8.setOut();
@@ -136,7 +121,7 @@ private:
       data8.setHiZ();
    }
 
-   //! Read a byte from the YM2151 bus
+   //! Read a byte from the YM3812 bus
    uint8_t readBus(bool a0_)
    {
       data8.setIn();
@@ -167,27 +152,29 @@ private:
    }
 
    static constexpr unsigned T_AS   = 10;    //!< Address setup (ns)
-   static constexpr unsigned T_AH   = 10;    //!< Address hold (ns)
-   static constexpr unsigned T_CSW  = 100;   //!< Chip slecet width (ns)
-   static constexpr unsigned T_DS   = 50;    //!< Data write setup (ns)
-   static constexpr unsigned T_DH   = 10;    //!< Data read/write hold (ns)
-   static constexpr unsigned T_ACC  = 180;   //!< Read data access (ns)
+   static constexpr unsigned T_AH   = 20;    //!< Address hold (ns)
+   static constexpr unsigned T_CSW  = 100;   //!< Chip select width (ns)
+   static constexpr unsigned T_DS   = 20;    //!< Data write setup (ns)
+   static constexpr unsigned T_DH   = 50;    //!< Data read/write hold (ns)
+   static constexpr unsigned T_ACC  = 200;   //!< Read data access (ns)
    static constexpr unsigned T_INIT = 25000; //!< Chip initialisation (ns)
 
    //!< Bi-directional data bus
    MTL::Gpio::InOut<8, PIN_DATA8> data8;
 
    //!< Control signals
-   MTL::Gpio::Out<1, _IC> _ic; //!< Initial clear
-   MTL::Gpio::Out<1, A0>  a0;  //!< 0=>address, 1=>data
-   MTL::Gpio::Out<1, _WR> _wr; //!< Write
-   MTL::Gpio::Out<1, _RD> _rd; //!< Read
+   MTL::Gpio::Out<1, PIN_CTRL4+0> _ic; //!< Initial clear
+   MTL::Gpio::Out<1, PIN_CTRL4+1> a0;  //!< 0=>address, 1=>data
+   MTL::Gpio::Out<1, PIN_CTRL4+2> _wr; //!< Write
+   MTL::Gpio::Out<1, PIN_CTRL4+3> _rd; //!< Read
 
    // MTL::Gpio::Out<1, PIN_CTRL5+4> _cs; //!< Chip select
    bool _cs; //!< dummy chip select
 
-   MTL::PioClock<PIO_SYNTH> clock{};  //! Clock out to YM2151
-   MTL::PioYMDAC<PIO_DAC>   dac_in{};
+   MTL::PioClock clock{};  //! Clock out to YM3812
+   PIO_SYNTH     pio{};    //! PIO instance
+
+   MTL::PioYMDAC<PIO_DAC> dac_in{};
 };
 
-} // namespace YM2151
+} // namespace YM3812

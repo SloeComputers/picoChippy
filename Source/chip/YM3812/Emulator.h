@@ -20,43 +20,34 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------
 
-// \brief Interface for output DAC
+// \brief Interface for Yamaha YM3812
 
 #pragma once
 
-#include "Sample.h"
+#include "YM812/Interface.h"
 
-namespace chip {
+namespace YM3812 {
 
-class Dac
-{     
-public:
-   Dac() = default;
-   
-   virtual void setSampleRate(unsigned sample_rate_hz_) = 0;
-}; 
-
-template <typename TYPE>
-class DacImpl : public Dac
+class Emulator : public Interface
 {
 public:
-   DacImpl(unsigned sample_rate_hz_)
-      : dac(sample_rate_hz_)
-   {
-   }
+   Emulator() = default;
 
-   void setSampleRate(unsigned sample_rate_hz_) override
+   signed download(unsigned clock_freq_)
    {
-      dac.setSampleRate(sample_rate_hz_);
-   }
-
-   void push(const Sample& sample_)
-   {
-      dac.push(sample_.left, sample_.right);
+      return 0;
    }
 
 private:
-   TYPE dac;
+   //! Write a byte to the YM2151 bus
+   void writeBus(bool a0_, uint8_t value_) override
+   {
+   }
+
+   //! 
+   void waitForReady() override
+   {
+   }
 };
 
-}
+} // namespace YM2151

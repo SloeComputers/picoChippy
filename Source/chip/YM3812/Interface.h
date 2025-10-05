@@ -20,18 +20,16 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------
 
-// \brief Interface for Yamaha YM2151
+// \brief Interface for Yamaha YM3812
 
 #pragma once
 
 #include <cstring>
 
-#include "Chip.h"
-
 #undef  DBG
 #define DBG if (0) printf
 
-namespace YM2151 {
+namespace YM3812 {
 
 enum Param
 {
@@ -55,62 +53,26 @@ enum Param
    AMS_EN, KS
 };
 
-static const uint8_t  OP_M1  = 0b0001;
-static const uint8_t  OP_C1  = 0b0010;
-static const uint8_t  OP_M2  = 0b0100;
-static const uint8_t  OP_C2  = 0b1000;
-static const uint8_t  OP_ALL = OP_M1 | OP_C1 | OP_M2 | OP_C2;
-static const unsigned NUM_OP = 4;
+static const uint8_t OP_M1  = 0b0001;
+static const uint8_t OP_C1  = 0b0010;
+static const uint8_t OP_M2  = 0b0100;
+static const uint8_t OP_C2  = 0b1000;
+static const uint8_t OP_ALL = OP_M1 | OP_C1 | OP_M2 | OP_C2;
 
-class Interface : public Chip
+class Interface
 {
 public:
-   Interface()
-      : Chip("YM2151", /* num_voices */ 8, /* clock_ticks_per_sample */ 64)
-   {
+   Interface() = default;
+
+   virtual void start()
+   {  
+      hardReset();
    }
-
-//------------------------------------------------------------------------------
-// Implement MIDI::Instrument
-
-   //! Play a note
-   void voiceOn(unsigned voice_, uint8_t midi_note_, uint8_t velocity_) override
-   {
-      static const unsigned table[12] = {0, 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14};
-
-      midi_note_ -= 1;
-
-      unsigned octave = midi_note_ / 12;
-      unsigned note   = table[midi_note_ % 12];
-
-      setCh<KC>(voice_, (octave << 4) | note);
-
-      writeReg(0x08, (OP_ALL << 3) | voice_);
-   }
-
-   //! Stop a note
-   void voiceOff(unsigned voice_, uint8_t velocity_) override
-   {
-      writeReg(0x08, voice_);
-   }
-
-   //! Set channel (0-3) attenuation
-   void voicePressure(unsigned voice_, uint8_t pressure_) override
-   {
-   }
-
-   virtual void voicePitchBend(unsigned voice_, int16_t value_) override
-   {
-   }
-
-//------------------------------------------------------------------------------
 
    //! 
    virtual void hardReset()
    {
       memset(shadow, 0, sizeof(shadow));
-
-      softReset();
    }
 
    //! Initialize registers to stop all sounds and timer activity
@@ -122,36 +84,34 @@ public:
       set<TIMER_IRQ>(0);  // Disable interrupts
       set<TIMER_CSM>(0);  // Clear CSM
 
-      for(unsigned voice = 0; voice < num_voices; voice++)
+      for(unsigned ch = 0; ch < 8; ch++)
       {
-         voiceOff(voice, 0);
-
-         // Config channel operators
-         for(uint8_t op = OP_M1; op < OP_ALL; op <<= 1)
+         for(unsigned op = 0; op < 4; op++)
          {
-            setOp<EG_AR>( voice, op, 31);
-            setOp<EG_D1R>(voice, op, 0);
-            setOp<EG_D1L>(voice, op, 0);
-            setOp<EG_D2R>(voice, op, 0);
-            setOp<EG_RR>( voice, op, 15);
-
-            setOp<EG_TL>( voice, op, 10);
-            setOp<MUL>(   voice, op, 1);
+            setOp<EG_D1L>(ch, op, 0xF);
+            setOp<EG_RR>( ch, op, 0x8);
          }
+      }
 
-         // Config voice
-         setCh<CONECT>(voice, 7);
-         setCh<FB>(    voice, 0);
-         setCh<RL>(    voice, 0b11);
-
-         setCh<KF>(    voice, 0);
-         setCh<AMS>(   voice, 0);
-         setCh<PMS>(   voice, 0);
+      for(unsigned ch = 0; ch < 8; ch++)
+      {
+         noteOff(ch);
       }
    }
 
+   void noteOn(unsigned channel_, uint8_t op_mask_ = OP_ALL)
+   {
+      writeReg(0x08, (op_mask_ << 3) | channel_);
+   }
+
+   void noteOff(unsigned channel_, uint8_t op_mask_ = OP_ALL)
+   {
+      op_mask_ = (~op_mask_) & OP_ALL;
+      writeReg(0x08, (op_mask_ << 3) | channel_);
+   }
+
    //! Set parameter
-   template <YM2151::Param PARAM>
+   template <YM3812::Param PARAM>
    void set(unsigned value_)
    {
       switch(PARAM)
@@ -189,7 +149,7 @@ public:
    }
 
    //! Set channel parameter
-   template <YM2151::Param PARAM>
+   template <YM3812::Param PARAM>
    void setCh(unsigned channel_, unsigned value_)
    {
       switch(PARAM)
@@ -207,7 +167,7 @@ public:
    }
 
    //! Set operator parameter
-   template <YM2151::Param PARAM>
+   template <YM3812::Param PARAM>
    void setOp(unsigned channel_, uint8_t op_, unsigned value_)
    {
       unsigned offset;
@@ -238,6 +198,21 @@ public:
       }
    }
 
+   //! Write a field in a register
+   void writeField(uint8_t  addr_,
+                   unsigned ls_bit_,
+                   unsigned bits_,
+                   unsigned data_)
+   {
+      uint8_t data_mask = (1 << bits_) - 1;
+      uint8_t reg_mask  = ~(data_mask << ls_bit_);
+
+      uint8_t data = (shadow[addr_] & reg_mask) |
+                     (data_ & data_mask) << ls_bit_;
+
+      writeReg(addr_, data);
+   }
+
    //! Write a register
    void writeReg(uint8_t addr_, uint8_t data_)
    {
@@ -260,39 +235,11 @@ public:
       return shadow[addr_];
    }
 
-   void reset() override
-   {
-      for(unsigned v = 0; v < num_voices; v++)
-      {
-         voiceOff(v, 0);
-      }
-   }
-
-   void write(uint16_t addr_, uint8_t data_) override
-   {
-      writeReg(addr_, data_);
-   }
-
 protected:
-   //! Write a field in a register
-   void writeField(uint8_t  addr_,
-                   unsigned ls_bit_,
-                   unsigned bits_,
-                   unsigned data_)
-   {
-      uint8_t data_mask = (1 << bits_) - 1;
-      uint8_t reg_mask  = ~(data_mask << ls_bit_);
-
-      uint8_t data = (shadow[addr_] & reg_mask) |
-                     (data_ & data_mask) << ls_bit_;
-
-      writeReg(addr_, data);
-   }
-
-   //! Write a byte to the YM2151 bus
+   //! Write a byte to the YM3812 bus
    virtual void writeBus(bool a0_, uint8_t value_) = 0;
 
-   //! Wait for YM2151 bus ready
+   //! Wait for YM3812 bus ready
    virtual void waitForReady() = 0;
 
    static constexpr bool A0_ADDR = false;
@@ -302,4 +249,4 @@ private:
    uint8_t shadow[256];
 };
 
-} // namespace YM2151
+} // namespace YM3812

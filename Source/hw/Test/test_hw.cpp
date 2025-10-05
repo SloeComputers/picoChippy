@@ -126,6 +126,8 @@ static void runDAC()
    {
       uint32_t phase{0};
 
+      dac_ptr->setSampleRate(48000);
+
       for(unsigned i = 0; i < (SAMPLE_RATE / 2); ++i)
       {
          int16_t sample = table_sine[phase >> FRAC_BITS];
@@ -135,7 +137,9 @@ static void runDAC()
          dac_ptr->push(sample, sample);
       }
 
-      for(unsigned i = 0; i < (SAMPLE_RATE / 2); ++i)
+      dac_ptr->setSampleRate(24000);
+
+      for(unsigned i = 0; i < (SAMPLE_RATE / 4); ++i)
       {
          dac_ptr->push(0, 0);
       }

@@ -82,10 +82,10 @@ private:
       }
       else
       {
-         if (data_ & 0b0001000) channel[0].off();
-         if (data_ & 0b0010000) channel[1].off();
-         if (data_ & 0b0100000) channel[2].off();
-         if (data_ & 0b1000000) channel[3].off();
+         if (data_ & 0b00001000) channel[0].off();
+         if (data_ & 0b00010000) channel[1].off();
+         if (data_ & 0b00100000) channel[2].off();
+         if (data_ & 0b01000000) channel[3].off();
       }
    }
 
