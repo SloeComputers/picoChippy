@@ -25,16 +25,16 @@
 
 // -----------------------------------------------------------------------------
 
-static const bool MIDI_DEBUG = true;
+static const bool MIDI_DEBUG = false;
 
 static SegaPCM::Emulator  sega_pcm{};
 static SN76489::Emulator  sn76489{};
 static OKIM6295::Emulator oki_m6295{};
 static VGM::Decoder       decoder{};
 
-static FilePortal    file_portal{"picoChippy", decoder};
-static SynthIO       synth_io{};
-static Synth         synth{synth_io};
+static FilePortal file_portal{"picoChippy", decoder};
+static SynthIO    synth_io{};
+static Synth      synth{synth_io};
 
 
 // --- FM Synth ----------------------------------------------------------------
@@ -166,24 +166,26 @@ int main()
 #if defined(HW_USB_DEVICE)
    usb.setDebug(MIDI_DEBUG);
    usb.attachInstrument(1, synth);
-   usb.attachInstrument(2, sn76489);
-   usb.attachInstrument(3, sega_pcm);
-   usb.attachInstrument(4, ym2151);
+   usb.attachInstrument(2, ym2151);
+   usb.attachInstrument(3, sn76489);
+   usb.attachInstrument(4, sega_pcm);
+   usb.attachInstrument(5, oki_m6295);
 #endif
 
    phys_midi.setDebug(MIDI_DEBUG);
    phys_midi.attachInstrument(1, synth);
-   phys_midi.attachInstrument(2, sn76489);
-   phys_midi.attachInstrument(3, sega_pcm);
-   phys_midi.attachInstrument(4, ym2151);
+   phys_midi.attachInstrument(2, ym2151);
+   phys_midi.attachInstrument(3, sn76489);
+   phys_midi.attachInstrument(4, sega_pcm);
+   phys_midi.attachInstrument(5, oki_m6295);
 
    synth.mapAkaiMIDImix();
 
    decoder.plugDAC(&dac);
+   decoder.plugYM2151(&ym2151);
    decoder.plugSN76489(&sn76489);
    decoder.plugSegaPCM(&sega_pcm);
    decoder.plugOKIM6295(&oki_m6295);
-   decoder.plugYM2151(&ym2151);
    decoder.load(table_vgm);
 
    while(true)

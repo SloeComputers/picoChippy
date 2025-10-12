@@ -15,7 +15,10 @@ WIP ... just started!!!
 Working...
    + VGM decode (but only for supported chips)
    + YM2151 hardware driver and YMDAC to I2S translator
-   + SegaPCM emulation mixed into the main I2S stream
+   + Following emulations mixed into the main I2S stream...
+   + SegaPCM
+   + SN76489
+   + OKIM5295
 
 ## Hardware
 
@@ -30,11 +33,11 @@ Working...
 This repo uses git sub-modules, so checkout using --recurse to clone all the
 dependent source...
 
-    git clone --recurse https://github.com/AnotherJohnH/picoChippy.git
+    git clone --recurse-submodules https://github.com/AnotherJohnH/picoChippy.git
 
 or
 
-    git clone --recurse ssh://git@github.com/AnotherJohnH/picoChippy.git
+    git clone --recurse-submodules ssh://git@github.com/AnotherJohnH/picoChippy.git
 
 ### Software dependencies
 
@@ -48,7 +51,7 @@ or
 
 Being developed on MacOS but should build on Linux too.
 
-Indirect build of all supported targets, rpipico and rpipico2 with cmake and make (or ninja)...
+Indirect build for supported target rpipico2 with cmake and make (or ninja)...
 
     make
 
@@ -69,3 +72,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Acknowledgements
 
+The VGM rippers

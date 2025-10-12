@@ -6,11 +6,13 @@
 autogen_py(Table_midi_vol)
 autogen_py(Table_midi_pan)
 autogen_py(Table_note_period)
+autogen_py(Table_atten4_3db)
 
 add_library(chip STATIC
             Table_midi_vol.cpp
             Table_midi_pan.cpp
-            Table_note_period.cpp)
+            Table_note_period.cpp
+            Table_atten4_3db.cpp)
 
 target_include_directories(chip
    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}

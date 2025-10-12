@@ -9,6 +9,7 @@
 
 #include <cstring>
 
+#include "Table_atten4_3db.h"
 #include "OKIM6295/Interface.h"
 
 #undef  DBG
@@ -83,7 +84,7 @@ private:
 
          adpcmReset();
 
-         vol    = 1;
+         gain   = table_atten4_3db[atten_];
          end    = end_;
          memory = start_;
       }
@@ -123,8 +124,8 @@ private:
 
          int16_t sample = adpcmDecode(input) << 2;
 
-         mix_.left  += sample * vol;
-         mix_.right += sample * vol;
+         mix_.left  += (sample * gain) >> 15;
+         mix_.right += (sample * gain) >> 15;
       }
 
    private:
@@ -172,10 +173,10 @@ private:
 
       signed   adpcm_step_index{0};
       unsigned adpcm_step_size{16};
-      unsigned adpcm_prev_out{0};
+      int32_t  adpcm_prev_out{0};
 
       bool           read_sample_pair{true};
-      uint8_t        vol{};
+      int16_t        gain{};
       const uint8_t* end{};
       const uint8_t* memory{}; //!< XXX volatile to enable hacky synchronization
       uint8_t        sample_pair;
