@@ -177,6 +177,8 @@ int main()
    phys_midi.attachInstrument(3, sega_pcm);
    phys_midi.attachInstrument(4, ym2151);
 
+   synth.mapAkaiMIDImix();
+
    decoder.plugDAC(&dac);
    decoder.plugSN76489(&sn76489);
    decoder.plugSegaPCM(&sega_pcm);

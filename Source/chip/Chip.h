@@ -9,7 +9,11 @@
 
 #include <cstdint>
 
+#include "STB/MIDIconst.h"
 #include "STB/MIDIInstrument.h"
+
+#include "Table_midi_vol.h"
+#include "Table_midi_pan.h"
 
 #include "Sample.h"
 
@@ -70,13 +74,13 @@ protected:
    //! Common audio processing for mono synth chips
    void mixer(int16_t mono_, Sample& mix_)
    {
-      mix_ += level * mono_;
+      mix_ += gain * mono_;
    }
 
    //! Common audio processing for stero synth chips
    void mixer(const Sample& stereo_, Sample& mix_)
    {
-      mix_ += level * stereo_;
+      mix_ += gain * stereo_;
    }
 
    //! Control a voice
@@ -87,13 +91,13 @@ protected:
 
       switch(control_)
       {
-      case 7:
-         volume = value_;
+      case MIDI::CTRL_VOLUME:
+         midi_vol = value_;
          controlUpdate();
          break;
 
-      case 8:
-         balance = value_;
+      case MIDI::CTRL_PAN:
+         midi_pan = value_;
          controlUpdate();
          break;
 
@@ -109,14 +113,13 @@ protected:
 private:
    void controlUpdate()
    {
-      // TODO convert to a dB scale
-      level.left  = volume << 8;
-      level.right = volume << 8;
+      gain.left  = table_midi_vol[midi_vol] * table_midi_pan[127 - midi_pan] >> 14;
+      gain.right = table_midi_vol[midi_vol] * table_midi_pan[midi_pan] >> 14;
    }
 
    const char*     name{};
-   uint8_t         volume{127};
-   uint8_t         balance{64};
-   volatile Sample level{};
+   uint8_t         midi_vol{127};
+   uint8_t         midi_pan{64};
+   volatile Sample gain{};
    unsigned        sample_mul{1};
 };
