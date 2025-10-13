@@ -34,7 +34,6 @@
 #define HW_YM2151_DAC_IN  MTL::PIN_10
 #define HW_YM2151_DATA8   MTL::PIN_14
 
-
 //------------------------------------------------------------------------------
 #elif defined(HW_PWM_DAC)
 
@@ -49,6 +48,12 @@
 #define HW_MIDI_IN_UART   MTL::Uart1_P26_P27
 
 #define HW_DAC_PWM        MTL::PIN_31
+
+#define HW_YM2151
+#define HW_YM2151_CTRL4   MTL::PIN_4
+#define HW_YM2151_CLK     MTL::PIN_9
+#define HW_YM2151_DAC_IN  MTL::PIN_10
+#define HW_YM2151_DATA8   MTL::PIN_14
 
 //------------------------------------------------------------------------------
 #elif defined(HW_WAVESHARE_REV2_1)
@@ -71,6 +76,12 @@
 #define HW_DAC_I2S_SD     MTL::PIN_29
 #define HW_DAC_I2S_CLKS   MTL::PIN_32
 #define HW_DAC_I2S_MCLK   MTL::PIN_31
+
+#define HW_YM2151
+#define HW_YM2151_CTRL4   MTL::PIN_4
+#define HW_YM2151_CLK     MTL::PIN_9
+#define HW_YM2151_DAC_IN  MTL::PIN_10
+#define HW_YM2151_DATA8   MTL::PIN_14
 
 //------------------------------------------------------------------------------
 #elif defined(HW_NATIVE)
