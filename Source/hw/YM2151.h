@@ -37,8 +37,8 @@ public:
 
       MTL::config.gpio(HW_YM2151_CLK, "YM2151 CLK");
 
-      MTL::config.gpio(HW_YM2151_DAC_IN + 0, "YM2151 DAC CLK");
-      MTL::config.gpio(HW_YM2151_DAC_IN + 1, "YM2151 DAC SD");
+      MTL::config.gpio(HW_YM2151_DAC_IN + 0, "YM2151 DAC SD");
+      MTL::config.gpio(HW_YM2151_DAC_IN + 1, "YM2151 DAC CLK");
       MTL::config.gpio(HW_YM2151_DAC_IN + 2, "YM2151 DAC SAM1");
 
       MTL::config.gpio(HW_YM2151_DATA8 + 0, "YM2151 D7");

@@ -13,9 +13,6 @@ class SynthIO
 public:
    SynthIO() = default;
 
-   //! Display number on 2x 7 segment LED
-   void displayLED(unsigned number_);
-
    //! Display on text on 16x2 LCD
    void displayLCD(unsigned row_, const char* text);
 
