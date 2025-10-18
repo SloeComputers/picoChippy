@@ -10,7 +10,9 @@
 
 #include "STB/FAT/FAT16.h"
 
-#include "hw/hw.h"
+#if not defined(HW_NATIVE)
+#include "MTL/Config.h"
+#endif
 
 #include "VGM/Decoder.h"
 

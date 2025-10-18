@@ -7,7 +7,7 @@
 
 #include <cstdio>
 
-#include "hw/hw.h"
+#include "hw/picoX21H.h"
 
 #include "Synth.h"
 #include "SynthIO.h"
