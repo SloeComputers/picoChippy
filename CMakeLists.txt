@@ -12,6 +12,7 @@ project(picoChippy
 include(CTest)
 
 add_subdirectory(Platform)
+add_subdirectory(hw)
 add_subdirectory(music)
 add_subdirectory(Source)
 

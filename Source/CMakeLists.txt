@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: MIT
 #-------------------------------------------------------------------------------
 
-add_subdirectory(hw)
 add_subdirectory(chip)
 add_subdirectory(VGM)
 
