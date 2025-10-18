@@ -8,7 +8,6 @@
 #include <cstdio>
 
 #include "hw/hw.h"
-#include "hw/YM2151.h"
 
 #include "Synth.h"
 #include "SynthIO.h"
@@ -20,6 +19,7 @@
 #include "SN76489/Emulator.h"
 #include "SegaPCM/Emulator.h"
 #include "OKIM6295/Emulator.h"
+#include "YM2151/Hardware.h"
    
 #include "VGM/Decoder.h"
 
@@ -27,6 +27,7 @@
 
 static const bool MIDI_DEBUG = false;
 
+static YM2151::Hardware   ym2151{};
 static SegaPCM::Emulator  sega_pcm{};
 static SN76489::Emulator  sn76489{};
 static OKIM6295::Emulator oki_m6295{};
@@ -35,11 +36,6 @@ static VGM::Decoder       decoder{};
 static FilePortal file_portal{"picoChippy", decoder};
 static SynthIO    synth_io{};
 static Synth      synth{synth_io};
-
-
-// --- FM Synth ----------------------------------------------------------------
-
-static hw::YM2151 ym2151;
 
 
 // --- Audio out DAC -----------------------------------------------------------

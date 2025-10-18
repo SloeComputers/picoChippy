@@ -79,7 +79,7 @@ private:
       decoder.load(vgm_file);
    }
 
-   char readme[1024];
+   char readme[2048];
 
    const char* index_html =
       "<html>"
