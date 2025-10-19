@@ -6,7 +6,7 @@
 add_subdirectory(chip)
 add_subdirectory(VGM)
 
-foreach(hw_config ${hw_config_list})
+foreach(hw_config ${hw_picoX21H_config_list})
 
    add_executable(picoChippy_${hw_config} picoChippy.cpp)
 
