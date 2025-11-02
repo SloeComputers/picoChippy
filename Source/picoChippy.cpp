@@ -50,29 +50,19 @@ static hw::PhysMidi phys_midi{};
 
 // --- USB MIDI ----------------------------------------------------------------
 
-#if defined(HW_USB_DEVICE)
-
 static hw::UsbFileMidi usb{0x91C0, "picoChippy", file_portal};
 
 extern "C" void IRQ_USBCTRL() { usb.irq(); }
 
-#endif
-
 
 // --- 16x2 LCD display --------------------------------------------------------
 
-#if not defined(HW_LCD_NONE)
-
 static hw::Lcd lcd{};
-
-#endif
 
 void SynthIO::displayLCD(unsigned row, const char* text)
 {
-#if not defined(HW_LCD_NONE)
    lcd.move(0, row);
    lcd.print(text);
-#endif
 }
 
 
@@ -150,7 +140,7 @@ int main()
 
    printf("\n");
 
-   puts(file_portal.genREADME());
+   puts(file_portal.addREADME("picoChippy"));
 
    synth_io.displayLCD(0, " Cambridge pico ");
    synth_io.displayLCD(1, " -*- Chippy -*- ");
@@ -159,14 +149,12 @@ int main()
 
    startAudio();
 
-#if defined(HW_USB_DEVICE)
    usb.setDebug(MIDI_DEBUG);
    usb.attachInstrument(1, synth);
    usb.attachInstrument(2, ym2151);
    usb.attachInstrument(3, sn76489);
    usb.attachInstrument(4, sega_pcm);
    usb.attachInstrument(5, oki_m6295);
-#endif
 
    phys_midi.setDebug(MIDI_DEBUG);
    phys_midi.attachInstrument(1, synth);
@@ -188,9 +176,7 @@ int main()
    {
       phys_midi.tick();
 
-#if defined(HW_USB_DEVICE)
       usb.tick();
-#endif
 
       decoder.tick();
 

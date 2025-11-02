@@ -51,9 +51,9 @@ public:
    //! Load VGM image
    void load(const uint8_t* image_)
    {
-      mode = SKIP;
-
       raw = image_;
+
+      mode = SKIP;
    }
 
    void play()
@@ -74,7 +74,6 @@ public:
          return;
 
       case PLAY:
-         configSynths();
          reset();
          mode = PLAYING;
          break;
@@ -88,7 +87,6 @@ public:
          return;
 
       case SKIP:
-         reset();
          mode = PLAY;
          return;
       }
@@ -312,6 +310,8 @@ private:
 
    void reset()
    {
+      configSynths();
+
       offset = 0x34 + hdr->vgm_data_offset;
 
       if (sn76489)   sn76489->reset();

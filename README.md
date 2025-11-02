@@ -22,9 +22,11 @@ Working...
 
 ## Hardware
 
-![prototype](docs/breadboard.jpg)
+![prototype](https://github.com/AnotherJohnH/Hardware/raw/main/picoX21H/docs/breadboard.jpg)
 
-[Schematic](docs/schematic.pdf) for the above.
+[Schematic](https://github.com/AnotherJohnH/Hardware/blob/main/picoX21H/docs/schematic.pdf) for the above.
+
+See [README](https://github.com/AnotherJohnH/Hardware/blob/main/picoX21H/README.md) for more information.
 
 ## Software
 
