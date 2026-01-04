@@ -13,6 +13,6 @@ include(CTest)
 
 set(HARDWARE picoX21H)
 
-add_subdirectory(Hardware)
+add_subdirectory(Platform/Hardware)
 add_subdirectory(music)
 add_subdirectory(Source)
