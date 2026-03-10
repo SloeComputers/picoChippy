@@ -13,7 +13,7 @@ class FilePortal : public hw::FilePortal
 {
 public:
    FilePortal(const char* label_, VGM::Decoder& decoder_)
-      : hw::FilePortal(label_, "https://github.com/AnotherJohnH/picoChippy")
+      : hw::FilePortal(label_, "https://github.com/SloeComputers/picoChippy")
       , decoder(decoder_)
    {
       newFileBuffer(vgm_file, sizeof(vgm_file));
