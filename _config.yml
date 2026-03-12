@@ -1,0 +1,4 @@
+theme: jekyll-theme-slate
+title: picoChippy
+description: A Sloe Computers Project
+exclude: Platform
