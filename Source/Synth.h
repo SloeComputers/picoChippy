@@ -8,8 +8,8 @@
 #include <cstdio>
 #include <unistd.h>
 
-#include "STB/MIDIconst.h"
-#include "STB/MIDIInstrument.h"
+#include "MIDI/Const.h"
+#include "MIDI/Instrument.h"
 
 #include "SynthIO.h"
 
