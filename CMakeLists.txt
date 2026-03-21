@@ -11,8 +11,8 @@ project(picoChippy
 
 include(CTest)
 
-set(HARDWARE picoX21H)
+set(HWR_CONFIG picoX21H)
 
-add_subdirectory(Platform/Hardware)
+add_subdirectory(Platform)
 add_subdirectory(music)
 add_subdirectory(Source)

@@ -7,7 +7,7 @@
 
 #include <cstdio>
 
-#include "Hardware/picoX21H/Config.h"
+#include "HWR/picoX21H/Config.h"
 
 #include "Synth.h"
 #include "SynthIO.h"
@@ -34,30 +34,30 @@ static OKIM6295::Emulator oki_m6295{};
 static VGM::Decoder       decoder{};
 
 static FilePortal file_portal{"picoChippy", decoder};
-static SynthIO    synth_io{};
-static Synth      synth{synth_io};
+static SynthIO         synth_io{};
+static Synth           synth{synth_io};
 
 
 // --- Audio out DAC -----------------------------------------------------------
 
-static chip::DacImpl<hw::Dac> dac{62500};
+static chip::DacImpl<HWR::Dac> dac{62500};
 
 
 // --- Physical MIDI -----------------------------------------------------------
 
-static hw::PhysMidi phys_midi{};
+static HWR::PhysMidi phys_midi{};
 
 
 // --- USB MIDI ----------------------------------------------------------------
 
-static hw::UsbFileMidi usb{0x91C0, "picoChippy", file_portal};
+static HWR::UsbFileMidi usb{0x91C0, "picoChippy", file_portal};
 
 extern "C" void IRQ_USBCTRL() { usb.irq(); }
 
 
 // --- 16x2 LCD display --------------------------------------------------------
 
-static hw::Lcd lcd{};
+static HWR::Lcd lcd{};
 
 void SynthIO::displayLCD(unsigned row, const char* text)
 {
@@ -68,7 +68,7 @@ void SynthIO::displayLCD(unsigned row, const char* text)
 
 // --- LED ---------------------------------------------------------------------
 
-static hw::Led led{};
+static HWR::Led led{};
 
 
 // -----------------------------------------------------------------------------

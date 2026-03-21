@@ -5,15 +5,15 @@
 
 #pragma once
 
-#include "Hardware/FilePortal.h"
+#include "HWR/FilePortal.h"
 
 #include "VGM/Decoder.h"
 
-class FilePortal : public hw::FilePortal
+class FilePortal : public HWR::FilePortal
 {
 public:
    FilePortal(const char* label_, VGM::Decoder& decoder_)
-      : hw::FilePortal(label_, "https://github.com/SloeComputers/picoChippy")
+      : HWR::FilePortal(label_, "https://github.com/SloeComputers/picoChippy")
       , decoder(decoder_)
    {
       newFileBuffer(vgm_file, sizeof(vgm_file));
