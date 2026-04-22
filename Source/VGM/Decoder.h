@@ -246,7 +246,7 @@ public:
       case 0xB8:
          addr = read8();
          data = read8();
-         if (oki_m6295) oki_m6295->write(0, data); break;
+         if (oki_m6295) oki_m6295->write(0, data);
          break;
 
       case 0xC0:
