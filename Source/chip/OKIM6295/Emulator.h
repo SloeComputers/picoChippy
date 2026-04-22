@@ -103,7 +103,6 @@ private:
          if (memory == end)
          {
             memory = nullptr;
-            printf("");
             return;
          }
 
