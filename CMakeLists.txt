@@ -9,6 +9,9 @@ project(picoChippy
         LANGUAGES CXX C ASM
         VERSION 0.02)
 
+if(NOT DEFINED BUILD_TESTING)
+    set(BUILD_TESTING OFF CACHE BOOL "Build unit tests")
+endif()
 include(CTest)
 
 set(HWR_CONFIG picoX21H)

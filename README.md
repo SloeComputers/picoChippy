@@ -10,6 +10,8 @@ Re-uses the same hardware as the sister project [picoX21H](https://github.com/Sl
 
 ## Status
 
+[![Build Status](https://github.com/SloeComputers/picoChippy/actions/workflows/build_on_push.yml/badge.svg)](https://github.com/SloeComputers/picoChippy/actions/workflows/build_on_push.yml)
+
 WIP ... just started!!!
 
 Working...
